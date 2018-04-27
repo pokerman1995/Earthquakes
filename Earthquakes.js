@@ -24,16 +24,17 @@
 
 
       var raster = new ol.layer.Tile({
-        source: new ol.source.Stamen({
-          layer: 'toner'
-        })
+        source: new ol.source.OSM()
       });
 
 
       var regions = new ol.layer.Vector({
         source: new ol.source.Vector({
           url: 'data/us_regions.kml',
-          format: new ol.format.KML()
+          format: new ol.format.KML(),
+            visibility: true, 
+            opacity: 1
+            
         })
       });
 
