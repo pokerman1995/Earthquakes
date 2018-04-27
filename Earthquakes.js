@@ -29,8 +29,17 @@
         })
       });
 
+
+      var regions = new ol.layer.Vector({
+        source: new ol.source.Vector({
+          url: 'data/us_regions.kml',
+          format: new ol.format.KML()
+        })
+      });
+
+
       var map = new ol.Map({
-        layers: [raster, vector],
+        layers: [raster, vector, regions],
         target: 'map',
         view: new ol.View({
           center: ol.proj.fromLonLat([-97, 38]),
