@@ -40,7 +40,7 @@
 
 
       var map = new ol.Map({
-        layers: [raster, vector, regions],
+        layers: [raster, regions, vector ],
         target: 'map',
         view: new ol.View({
           center: ol.proj.fromLonLat([-97, 38]),
