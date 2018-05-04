@@ -1,4 +1,8 @@
-      var blur = document.getElementById('blur');
+var Earthquakes = Earthquakes || {}
+
+parseCsv();
+
+var blur = document.getElementById('blur');
       var radius = document.getElementById('radius');
 
       var vector = new ol.layer.Heatmap({
@@ -33,7 +37,7 @@
           url: 'data/us_regions.kml',
           format: new ol.format.KML(),
             visibility: true, 
-            opacity: 1
+            opacity: 1,
             
         })
       });
