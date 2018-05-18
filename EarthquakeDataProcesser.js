@@ -1,9 +1,11 @@
 var d3 = d3 || {}
 var Earthquakes = Earthquakes || {}
 
+var countriesCount;
+
 function parseCsv(){
     d3.csv("data/earthquake_data.csv", function(data){
-        var countriesCount =d3.nest()
+        countriesCount =d3.nest()
             .key(function(d) {
                 var key = d[data.columns[10]];
                 if(key !== ""){
@@ -41,9 +43,9 @@ function parseCsv(){
             
             
         }
-        console.log(countriesCount);
         //for(var i = 0; i < data.length; i++){
           //  console.log(data[i][data.columns[10]]);
         //}
     });
+    return countriesCount;
 }

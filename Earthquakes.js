@@ -1,6 +1,6 @@
 var Earthquakes = Earthquakes || {}
 
-parseCsv();
+var countriesCount = parseCsv();
 
 var blur = document.getElementById('blur');
       var radius = document.getElementById('radius');
@@ -41,6 +41,11 @@ var blur = document.getElementById('blur');
             
         })
       });
+
+      regions.getSource().on('addfeature', function(event) {
+          console.log(countriesCount);
+      });
+
 
 
       var map = new ol.Map({
