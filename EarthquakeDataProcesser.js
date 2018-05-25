@@ -1,19 +1,21 @@
 var d3 = d3 || {}
 var Earthquakes = Earthquakes || {}
 
-var countriesCount;
+var EarthquakeDataProcesser = function(isLoaded){
+  var that = {};
 
-function parseCsv(){
+
+    var countriesCount;
     d3.csv("data/earthquake_data.csv", function(data){
         countriesCount =d3.nest()
             .key(function(d) {
                 var key = d[data.columns[10]];
                 if(key !== ""){
-                return d[data.columns[10]]; 
+                return d[data.columns[10]];
                 }})
             .rollup(function(v) { return v.length; })
             .entries(data);
-        
+
         for(var i in countriesCount){
             if( countriesCount[i].key === "undefined"){
                 countriesCount.splice(i, 1);
@@ -40,12 +42,15 @@ function parseCsv(){
                 return value;
             });
             countriesCount[i].valueBigOne = countriesCount[i].valueBigOne/countriesCount[i].value;
-            
-            
+
         }
+        isLoaded(countriesCount);
+
+
         //for(var i = 0; i < data.length; i++){
           //  console.log(data[i][data.columns[10]]);
         //}
     });
-    return countriesCount;
+
+  return that;
 }
