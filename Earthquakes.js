@@ -2,6 +2,7 @@ var Earthquakes = Earthquakes || {};
 var countriesCount;
 var isLoaded = function(data){
   countriesCount = data;
+  console.log(countriesCount  );
   return true;
 }
 var parser = new EarthquakeDataProcesser(isLoaded);
@@ -56,12 +57,12 @@ var getColor = function(value){
   value = value*10
   console.log(value);
    var countryColor;
-   if(value < 11){
-     countryColor = 'rgba(0,0,255,0.8)';
-   } if (11 < value && value < 15) {
-     countryColor = 'rgba(0, 0,255, 0.5)';
-   } if (value > 15) {
-     countryColor = 'rgba(255, 0, 0, 0.5)';
+   if(value < 21){
+     countryColor = 'rgba(0,0,255,0.3)';
+   } if (21 < value && value < 25) {
+     countryColor = 'rgba(0, 255,0, 0.3)';
+   } if (value > 25) {
+     countryColor = 'rgba(255, 0, 0, 0.3)';
    }
    console.log(countryColor);
    var style = new ol.style.Style({
@@ -91,7 +92,7 @@ var getColor = function(value){
 
 
   var map = new ol.Map({
-    layers: [raster, vector, regions ],
+    layers: [raster, regions, vector ],
     target: 'map',
     view: new ol.View({
       center: ol.proj.fromLonLat([-97, 38]),

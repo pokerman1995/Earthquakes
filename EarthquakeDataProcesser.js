@@ -17,25 +17,24 @@ var EarthquakeDataProcesser = function(isLoaded){
             .entries(data);
 
         for(var i in countriesCount){
-            if( countriesCount[i].key === "undefined"){
-                countriesCount.splice(i, 1);
-                continue;
-            }
             countriesCount[i].valueBigOne=d3.sum(data, function(d){
                 var value = 0;
                 if(d[data.columns[10]] === countriesCount[i].key){
                     switch(d[data.columns[1]]){
+                      case "Not at all worried":
+                        value = 1;
+                        break;
                         case "Not so worried":
-                            value = 1;
-                            break;
-                        case "Somewhat worried":
                             value = 2;
                             break;
-                        case "Very worried":
+                        case "Somewhat worried":
                             value = 3;
                             break;
-                        case "Extremely worried":
+                        case "Very worried":
                             value = 4;
+                            break;
+                        case "Extremely worried":
+                            value = 5;
                             break;
                     }
                 }
@@ -43,7 +42,15 @@ var EarthquakeDataProcesser = function(isLoaded){
             });
             countriesCount[i].valueBigOne = countriesCount[i].valueBigOne/countriesCount[i].value;
 
+
         }
+        for(var i in countriesCount){
+
+          if(countriesCount[i].key ==="undefined"){
+            countriesCount.splice(i, 1);
+          }
+        }
+
         isLoaded(countriesCount);
 
 
