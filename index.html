@@ -14,6 +14,12 @@
 
   </head>
   <body>
+    <div id="menue" class="menue">
+      <button>General Fear</button>
+      <button>Witnessed an Earthquake</button>
+      <button>Fear of Fatal Earthquake</button>
+    </div>
+
     <div id="map" class="map"><div id="info"></div></div>
 
     <form>
@@ -22,11 +28,11 @@
       <label>blur size</label>
       <input id="blur" type="range" min="1" max="50" step="1" value="15"/>
     </form>
+   <script scr="EventPublisher.js"></script>
    <script src="MapView.js"></script>
    <script src="EarthquakeDataProcesser.js"></script>
    <script src="UserInputController.js"></script>
    <script src="./lib/d3/d3.js"></script>
    <script src="Earthquakes.js"></script>
-
   </body>
 </html>
