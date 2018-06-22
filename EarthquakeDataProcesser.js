@@ -1,26 +1,37 @@
 var d3 = d3 || {}
 var Earthquakes = Earthquakes || {}
 
-var EarthquakeDataProcesser = function(isLoaded){
+var EarthquakeDataProcesser = function(){
   var that = {};
 
+  const COUNTRY_COLUMN = 10;
 
-    var countriesCount;
-    d3.csv("data/earthquake_data.csv", function(data){
-        countriesCount =d3.nest()
+   function cleanEmptyData(arrayName) {
+     for(var i in arrayName){
+       if(arrayName[i].key ==="undefined"){
+         arrayName.splice(i, 1);
+       }
+     }
+     return arrayName;
+   }
+
+    var dataParser = function (isLoaded, dataColumn){
+    var arrayName;
+        d3.csv("data/earthquake_data.csv", function(data){
+        arrayName =d3.nest()
             .key(function(d) {
-                var key = d[data.columns[10]];
+                var key = d[data.columns[COUNTRY_COLUMN]];
                 if(key !== ""){
-                return d[data.columns[10]];
+                return d[data.columns[COUNTRY_COLUMN]];
                 }})
             .rollup(function(v) { return v.length; })
             .entries(data);
 
-        for(var i in countriesCount){
-            countriesCount[i].valueBigOne=d3.mean(data, function(d){
+        for(var i in arrayName){
+            arrayName[i].dataValue=d3.mean(data, function(d){
                 var value = 0;
-                if(d[data.columns[10]] === countriesCount[i].key){
-                    switch(d[data.columns[1]]){
+                if(d[data.columns[COUNTRY_COLUMN]] === arrayName[i].key){
+                    switch(d[data.columns[dataColumn]]){
                       case "Not at all worried":
                         value = 1;
                         break;
@@ -40,24 +51,47 @@ var EarthquakeDataProcesser = function(isLoaded){
                 }
                 return value;
             });
-            //countriesCount[i].valueBigOne = countriesCount[i].valueBigOne/countriesCount[i].value;
-
-
         }
-        for(var i in countriesCount){
+        console.log(arrayName);
+        arrayName = cleanEmptyData(arrayName);
+        isLoaded(arrayName);
+  });
+}
 
-          if(countriesCount[i].key ==="undefined"){
-            countriesCount.splice(i, 1);
-          }
+var binaryDataParser = function (isLoaded, dataColumn) {
+  var arrayName;
+      d3.csv("data/earthquake_data.csv", function(data){
+      arrayName =d3.nest()
+          .key(function(d) {
+              var key = d[data.columns[COUNTRY_COLUMN]];
+              if(key !== ""){
+              return d[data.columns[COUNTRY_COLUMN]];
+              }})
+          .rollup(function(v) { return v.length; })
+          .entries(data);
+
+  for(var i in arrayName){
+      arrayName[i].dataValue=d3.mean(data, function(d){
+          var value = 0;
+          if(d[data.columns[COUNTRY_COLUMN]] === arrayName[i].key){
+              switch(d[data.columns[dataColumn]]){
+                case "Yes":
+                    value = 1;
+                    break;
+                  case "No":
+                    value = 2;
+                    break;
+                  }
+                }
+                return value;
+            });
         }
-
-        isLoaded(countriesCount);
-
-
-        //for(var i = 0; i < data.length; i++){
-          //  console.log(data[i][data.columns[10]]);
-        //}
-    });
-
+  arrayName = cleanEmptyData(arrayName);
+  console.log(arrayName);
+  isLoaded(arrayName);
+});
+}
+  that.binaryDataParser = binaryDataParser;
+  that.dataParser = dataParser;
   return that;
 }

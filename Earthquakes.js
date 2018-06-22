@@ -1,12 +1,13 @@
 var Earthquakes = Earthquakes || {};
-var countriesCount;
+var arrayName;
 var isLoaded = function(data){
-  countriesCount = data;
-  console.log(countriesCount  );
+  arrayName = data;
   return true;
 }
-var parser = new EarthquakeDataProcesser(isLoaded);
-
+var parser = new EarthquakeDataProcesser();
+parser.dataParser(isLoaded, 0);
+parser.dataParser(isLoaded, 1);
+parser.binaryDataParser(isLoaded, 2);
 //var that = new EventPublisher();
 var blur = document.getElementById('blur');
 console.log(blur);
@@ -75,9 +76,9 @@ var getColor = function(value){
   regions.getSource().on('addfeature', function(event) {
     var name = event.feature.get('name');
     var value;
-    for(var i  = 0; i < countriesCount.length; i++){
-      if( countriesCount[i].key === name){
-        value = countriesCount[i].valueBigOne;
+    for(var i  = 0; i < arrayName.length; i++){
+      if( arrayName[i].key === name){
+        value = arrayName[i].dataValue;
       }
 
     }
