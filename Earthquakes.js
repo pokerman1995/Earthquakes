@@ -1,6 +1,7 @@
 var Earthquakes = Earthquakes || {};
 var arrayName;
 var isLoaded = function(data){
+
   arrayName = data;
   return true;
 }
@@ -10,7 +11,6 @@ parser.dataParser(isLoaded, 1);
 parser.binaryDataParser(isLoaded, 2);
 //var that = new EventPublisher();
 var blur = document.getElementById('blur');
-console.log(blur);
 var radius = document.getElementById('radius');
 var userInputController;
 
@@ -72,7 +72,6 @@ var getColor = function(value){
 }
 
 
-
   regions.getSource().on('addfeature', function(event) {
     var name = event.feature.get('name');
     var value;
@@ -86,10 +85,58 @@ var getColor = function(value){
 
   })
 
+Earthquakes.ChangeDataControl = function(opt_options) {
+
+    var options = opt_options || {};
+    var button1 = document.createElement('button');
+    button1.setAttribute('id', 'button-change-data');
+    button1.innerHTML="Fear of 'Big One'";
+    var button2 = document.createElement('button');
+    button2.innerHTML="Fear in general";
+    button2.setAttribute('id', 'button-change-data');
+    var button3 = document.createElement('button');
+    button3.setAttribute('id', 'button-change-data');
+    button3.innerHTML="Earthquake experienced";
+
+    var _this = this;
+
+
+    button1.addEventListener('click', changeLayoutToFearBigOne, false);
+    button1.addEventListener('touchstart', changeLayoutToFearBigOne, false);
+
+    button2.addEventListener('click', changeLayoutToFearGeneral, false);
+    button2.addEventListener('touchstart', changeLayoutToFearGeneral, false);
+
+    button3.addEventListener('click', changeLayoutToWitnessedEarthquakes, false);
+    button3.addEventListener('touchstart', changeLayoutToWitnessedEarthquakes, false);
+
+    var element = document.createElement('div');
+    element.className='change-data ol-unselectable ol-control';
+    element.appendChild(button1);
+    element.appendChild(button2);
+    element.appendChild(button3);
+
+
+    ol.control.Control.call(this, {
+      element: element,
+      target: options.target
+    });
+  };
+  ol.inherits(Earthquakes.ChangeDataControl, ol.control.Control);
+
+
+
 
 
 
   var map = new ol.Map({
+    controls: ol.control.defaults({
+      attributionOptions: {
+        collapsible: false
+      }
+    }).extend([
+      new Earthquakes.ChangeDataControl()
+    ]),
     layers: [raster, regions, vector ],
     target: 'map',
     view: new ol.View({
@@ -97,11 +144,6 @@ var getColor = function(value){
       zoom: 5
     })
   });
-
-
-
-
-
 
   blur.addEventListener('input', function() {
     vector.setBlur(parseInt(blur.value, 10));
@@ -142,15 +184,15 @@ var info = $('#info');
     displayFeatureInfo(map.getEventPixel(evt.originalEvent));
   });
 
-  function changeLayoutToGeneral() {
-
+  function changeLayoutToFearBigOne() {
+    console.log("Big ONe");
   }
 
-  function changeLayoutToWitnessed() {
-
+  function changeLayoutToFearGeneral() {
+    console.log("hallo");
   }
 
-  function changeLayoutToFatal() {
+  function changeLayoutToWitnessedEarthquakes() {
 
   }
 
