@@ -7,9 +7,10 @@ var isLoaded = function(data){
 }
 var parser = new EarthquakeDataProcesser(isLoaded);
 
-
+var that = new EventPublisher();
 var blur = document.getElementById('blur');
 var radius = document.getElementById('radius');
+var userInputController;
 
 var vector = new ol.layer.Heatmap({
     source: new ol.source.Vector({
@@ -144,6 +145,29 @@ var info = $('#info');
     displayFeatureInfo(map.getEventPixel(evt.originalEvent));
   });
 
+  function changeLayoutToGeneral() {
+
+  }
+
+  function changeLayoutToWitnessed() {
+
+  }
+
+  function changeLayoutToFatal() {
+
+  }
+
+
+  function init () {
+    userInputController = new Earthquakes.userInputController;
+    userInputController.addEventListener("changeLayoutToGeneralFear", changeLayoutToGeneral);
+    userInputController.addEventListener("changeLayoutToWitnessedEarthquakes", changeLayoutToWitnessed);
+    userInputController.addEventListener("changeLayoutToFatalFear", changeLayoutToFatal);
+  }
+
   map.on('click', function(evt) {
     displayFeatureInfo(evt.pixel);
+
+
+
 });
