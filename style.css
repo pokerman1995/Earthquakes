@@ -14,11 +14,9 @@
 	text-align: center;
 }
 
-
-
-.button-change-data {
-  width:50px;
-  height: 100px;
+#button-change-data {
+  width:200px;
+  height: 20px;
 }
 
 .change-data {
@@ -28,6 +26,7 @@
 }
 .ol-touch .change-data {
   top: 5px;
+
 
 #headerImg{
   margin: 0 auto;

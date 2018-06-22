@@ -4,7 +4,7 @@ var Earthquakes = Earthquakes || {}
 Earthquakes.UserInputController = function () {
 	"use strict";
 
-  var that = new EventPublisher(),
+  var that = {},
     controls = document.querySelector(".menue");
 
 
@@ -31,12 +31,12 @@ Earthquakes.UserInputController = function () {
     button3.addEventListener("click", onFatalButtonClicked);
   }
 
+	
   init();
 
+	that.changeDataControl = changeDataControl;
   that.onFearButtonClicked = onFearButtonClicked;
   that.onWitnessButtonClicked = onWitnessButtonClicked;
   that.onFatalButtonClicked = onFatalButtonClicked;
   return that;
 }
-
-

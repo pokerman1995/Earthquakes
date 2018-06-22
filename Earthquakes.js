@@ -86,21 +86,26 @@ Earthquakes.ChangeDataControl = function(opt_options) {
 
     var options = opt_options || {};
     var button1 = document.createElement('button');
-    button1.className = "button-change-data";
-    button1.innerHTML="Button 1";
+    button1.setAttribute('id', 'button-change-data');
+    button1.innerHTML="Fear of 'Big One'";
     var button2 = document.createElement('button');
-    button2.innerHTML="Button 2";
+    button2.innerHTML="Fear in general";
+    button2.setAttribute('id', 'button-change-data');
     var button3 = document.createElement('button');
-    button3.innerHTML="Button 3";
+    button3.setAttribute('id', 'button-change-data');
+    button3.innerHTML="Earthquake experienced";
 
     var _this = this;
-    var handleDataChange = function(){
-      _this.getMap().getView().setRotation(180);
 
-    };
 
-    button1.addEventListener('click', handleDataChange, false);
-    button1.addEventListener('touchstart', handleDataChange, false);
+    button1.addEventListener('click', changeLayoutToFearBigOne, false);
+    button1.addEventListener('touchstart', changeLayoutToFearBigOne, false);
+
+    button2.addEventListener('click', changeLayoutToFearGeneral, false);
+    button2.addEventListener('touchstart', changeLayoutToFearGeneral, false);
+
+    button3.addEventListener('click', changeLayoutToWitnessedEarthquakes, false);
+    button3.addEventListener('touchstart', changeLayoutToWitnessedEarthquakes, false);
 
     var element = document.createElement('div');
     element.className='change-data ol-unselectable ol-control';
@@ -176,15 +181,15 @@ var info = $('#info');
     displayFeatureInfo(map.getEventPixel(evt.originalEvent));
   });
 
-  function changeLayoutToGeneral() {
-
+  function changeLayoutToFearBigOne() {
+    console.log("Big ONe");
   }
 
-  function changeLayoutToWitnessed() {
-
+  function changeLayoutToFearGeneral() {
+    console.log("hallo");
   }
 
-  function changeLayoutToFatal() {
+  function changeLayoutToWitnessedEarthquakes() {
 
   }
 
