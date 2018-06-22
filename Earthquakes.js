@@ -7,8 +7,9 @@ var isLoaded = function(data){
 }
 var parser = new EarthquakeDataProcesser(isLoaded);
 
-var that = new EventPublisher();
+//var that = new EventPublisher();
 var blur = document.getElementById('blur');
+console.log(blur);
 var radius = document.getElementById('radius');
 var userInputController;
 
@@ -55,20 +56,15 @@ var style = new ol.style.Style({
 });
 
 var getColor = function(value){
-  value = value*10
   console.log(value);
-   var countryColor;
-   if(value < 21){
-     countryColor = 'rgba(0,0,255,0.3)';
-   } if (21 < value && value < 25) {
-     countryColor = 'rgba(0, 255,0, 0.3)';
-   } if (value > 25) {
-     countryColor = 'rgba(255, 0, 0, 0.3)';
-   }
-   console.log(countryColor);
+   var red = 255*value*1.5;
+   var green = 255-red;
+   var color="rgba(" + red + ", " + green + ", 0, 0.5)";
+
+   console.log(color);
    var style = new ol.style.Style({
      fill: new ol.style.Fill({
-       color:countryColor
+       color:color
      })
    });
    return style;

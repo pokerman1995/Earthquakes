@@ -17,7 +17,7 @@ var EarthquakeDataProcesser = function(isLoaded){
             .entries(data);
 
         for(var i in countriesCount){
-            countriesCount[i].valueBigOne=d3.sum(data, function(d){
+            countriesCount[i].valueBigOne=d3.mean(data, function(d){
                 var value = 0;
                 if(d[data.columns[10]] === countriesCount[i].key){
                     switch(d[data.columns[1]]){
@@ -40,7 +40,7 @@ var EarthquakeDataProcesser = function(isLoaded){
                 }
                 return value;
             });
-            countriesCount[i].valueBigOne = countriesCount[i].valueBigOne/countriesCount[i].value;
+            //countriesCount[i].valueBigOne = countriesCount[i].valueBigOne/countriesCount[i].value;
 
 
         }
