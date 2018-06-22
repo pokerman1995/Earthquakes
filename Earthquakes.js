@@ -2,14 +2,12 @@ var Earthquakes = Earthquakes || {};
 var countriesCount;
 var isLoaded = function(data){
   countriesCount = data;
-  console.log(countriesCount  );
   return true;
 }
 var parser = new EarthquakeDataProcesser(isLoaded);
 
 //var that = new EventPublisher();
 var blur = document.getElementById('blur');
-console.log(blur);
 var radius = document.getElementById('radius');
 var userInputController;
 
@@ -71,7 +69,6 @@ var getColor = function(value){
 }
 
 
-
   regions.getSource().on('addfeature', function(event) {
     var name = event.feature.get('name');
     var value;
@@ -85,10 +82,53 @@ var getColor = function(value){
 
   })
 
+Earthquakes.ChangeDataControl = function(opt_options) {
+
+    var options = opt_options || {};
+    var button1 = document.createElement('button');
+    button1.className = "button-change-data";
+    button1.innerHTML="Button 1";
+    var button2 = document.createElement('button');
+    button2.innerHTML="Button 2";
+    var button3 = document.createElement('button');
+    button3.innerHTML="Button 3";
+
+    var _this = this;
+    var handleDataChange = function(){
+      _this.getMap().getView().setRotation(180);
+
+    };
+
+    button1.addEventListener('click', handleDataChange, false);
+    button1.addEventListener('touchstart', handleDataChange, false);
+
+    var element = document.createElement('div');
+    element.className='change-data ol-unselectable ol-control';
+    element.appendChild(button1);
+    element.appendChild(button2);
+    element.appendChild(button3);
+
+
+    ol.control.Control.call(this, {
+      element: element,
+      target: options.target
+    });
+  };
+  ol.inherits(Earthquakes.ChangeDataControl, ol.control.Control);
+
+
+
 
 
 
   var map = new ol.Map({
+    controls: ol.control.defaults({
+      attributionOptions: {
+        collapsible: false
+      }
+    }).extend([
+      new Earthquakes.ChangeDataControl()
+    ]),
     layers: [raster, regions, vector ],
     target: 'map',
     view: new ol.View({
@@ -96,11 +136,6 @@ var getColor = function(value){
       zoom: 5
     })
   });
-
-
-
-
-
 
   blur.addEventListener('input', function() {
     vector.setBlur(parseInt(blur.value, 10));

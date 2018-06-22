@@ -13,12 +13,18 @@
 	text-align: center;
 }
 
-button {
-	border-style: solid;
-	border-width: 2px;
-	border-color: black;
-	color: black;
-	font-size: 1.3em;
-	text-align: center;
+
+
+.button-change-data {
+  width:50px;
+  height: 100px;
 }
 
+.change-data {
+  top: 5px;
+  right: 2em;
+
+}
+.ol-touch .change-data {
+  top: 5px;
+}
