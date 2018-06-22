@@ -6,19 +6,19 @@ var EarthquakeDataProcesser = function(){
 
   const COUNTRY_COLUMN = 10;
 
-   function cleanEmptyData(arrayName) {
-     for(var i in arrayName){
-       if(arrayName[i].key ==="undefined"){
-         arrayName.splice(i, 1);
+   function cleanEmptyData(parsedData) {
+     for(var i in parsedData){
+       if(parsedData[i].key ==="undefined"){
+         parsedData.splice(i, 1);
        }
      }
-     return arrayName;
+     return parsedData;
    }
 
     var dataParser = function (isLoaded, dataColumn){
-    var arrayName;
+    var parsedData;
         d3.csv("data/earthquake_data.csv", function(data){
-        arrayName =d3.nest()
+        parsedData =d3.nest()
             .key(function(d) {
                 var key = d[data.columns[COUNTRY_COLUMN]];
                 if(key !== ""){
@@ -27,10 +27,10 @@ var EarthquakeDataProcesser = function(){
             .rollup(function(v) { return v.length; })
             .entries(data);
 
-        for(var i in arrayName){
-            arrayName[i].dataValue=d3.mean(data, function(d){
+        for(var i in parsedData){
+            parsedData[i].dataValue=d3.mean(data, function(d){
                 var value = 0;
-                if(d[data.columns[COUNTRY_COLUMN]] === arrayName[i].key){
+                if(d[data.columns[COUNTRY_COLUMN]] === parsedData[i].key){
                     switch(d[data.columns[dataColumn]]){
                       case "Not at all worried":
                         value = 1;
@@ -52,16 +52,16 @@ var EarthquakeDataProcesser = function(){
                 return value;
             });
         }
-        console.log(arrayName);
-        arrayName = cleanEmptyData(arrayName);
-        isLoaded(arrayName);
+        console.log(parsedData);
+        parsedData = cleanEmptyData(parsedData);
+        isLoaded(parsedData);
   });
 }
 
 var binaryDataParser = function (isLoaded, dataColumn) {
-  var arrayName;
+  var parsedData;
       d3.csv("data/earthquake_data.csv", function(data){
-      arrayName =d3.nest()
+      parsedData =d3.nest()
           .key(function(d) {
               var key = d[data.columns[COUNTRY_COLUMN]];
               if(key !== ""){
@@ -70,10 +70,10 @@ var binaryDataParser = function (isLoaded, dataColumn) {
           .rollup(function(v) { return v.length; })
           .entries(data);
 
-  for(var i in arrayName){
-      arrayName[i].dataValue=d3.mean(data, function(d){
+  for(var i in parsedData){
+      parsedData[i].dataValue=d3.mean(data, function(d){
           var value = 0;
-          if(d[data.columns[COUNTRY_COLUMN]] === arrayName[i].key){
+          if(d[data.columns[COUNTRY_COLUMN]] === parsedData[i].key){
               switch(d[data.columns[dataColumn]]){
                 case "Yes":
                     value = 1;
@@ -86,9 +86,9 @@ var binaryDataParser = function (isLoaded, dataColumn) {
                 return value;
             });
         }
-  arrayName = cleanEmptyData(arrayName);
-  console.log(arrayName);
-  isLoaded(arrayName);
+  parsedData = cleanEmptyData(parsedData);
+  console.log(parsedData);
+  isLoaded(parsedData);
 });
 }
   that.binaryDataParser = binaryDataParser;

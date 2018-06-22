@@ -1,8 +1,8 @@
 var Earthquakes = Earthquakes || {};
-var arrayName;
+var parsedData;
 var isLoaded = function(data){
 
-  arrayName = data;
+  parsedData = data;
   return true;
 }
 var parser = new EarthquakeDataProcesser();
@@ -75,9 +75,9 @@ var getColor = function(value){
   regions.getSource().on('addfeature', function(event) {
     var name = event.feature.get('name');
     var value;
-    for(var i  = 0; i < arrayName.length; i++){
-      if( arrayName[i].key === name){
-        value = arrayName[i].dataValue;
+    for(var i  = 0; i < parsedData.length; i++){
+      if( parsedData[i].key === name){
+        value = parsedData[i].dataValue;
       }
 
     }
