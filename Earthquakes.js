@@ -1,14 +1,12 @@
 var Earthquakes = Earthquakes || {};
 var parsedData;
 var isLoaded = function(data){
-
   parsedData = data;
-  return true;
 }
 var parser = new EarthquakeDataProcesser();
-parser.dataParser(isLoaded, 0);
 parser.dataParser(isLoaded, 1);
-parser.binaryDataParser(isLoaded, 2);
+//parser.dataParser(isLoaded, 1);
+//parser.binaryDataParser(isLoaded, 2);
 //var that = new EventPublisher();
 var blur = document.getElementById('blur');
 var radius = document.getElementById('radius');
@@ -34,6 +32,8 @@ vector.getSource().on('addfeature', function(event) {
     var magnitude = parseFloat(name.substr(2));
     event.feature.set('weight', magnitude);
   });
+
+
 
 
 var raster = new ol.layer.Tile({
@@ -84,6 +84,7 @@ var getColor = function(value){
     event.feature.setStyle(getColor(value));
 
   })
+
 
 Earthquakes.ChangeDataControl = function(opt_options) {
 
@@ -185,11 +186,15 @@ var info = $('#info');
   });
 
   function changeLayoutToFearBigOne() {
-    console.log("Big ONe");
+    regions.getSource().clear();
+    regions.getSource().refresh({force:true});
   }
 
+
   function changeLayoutToFearGeneral() {
-    console.log("hallo");
+    parsedData = {};
+    // Custom Event erzeugen->triggered, wenn daten geladen
+
   }
 
   function changeLayoutToWitnessedEarthquakes() {
