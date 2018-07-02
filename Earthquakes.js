@@ -160,10 +160,15 @@ var info = $('#info');
     trigger: 'manual'
   });
 
+var diagram = $('#map');
+var test = document.createElement('div');
+test.setAttribute('id', 'test');
+test.innerHTML="Click for more information.";
+
   var displayFeatureInfo = function(pixel) {
     info.css({
       left: pixel[0] + 'px',
-      top: (pixel[1] + 220) + 'px'
+      top: (pixel[1] + 160) + 'px'
     });
     var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
       return feature;
@@ -173,6 +178,10 @@ var info = $('#info');
           .attr('data-original-title', feature.get('name'))
           .tooltip('fixTitle')
           .tooltip('show');
+		
+		$('.tooltip-inner').click(function(){
+			$('.tooltip-inner').append(test);
+		})
 
 		
     } else {
