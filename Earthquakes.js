@@ -2,9 +2,10 @@ var Earthquakes = Earthquakes || {};
 var parsedData;
 var isLoaded = function(data){
   parsedData = data;
+  regions.getSource().clear();
 }
 var parser = new EarthquakeDataProcesser();
-parser.dataParser(isLoaded, 1);
+parser.dataParser(isLoaded, 0);
 //parser.dataParser(isLoaded, 1);
 //parser.binaryDataParser(isLoaded, 2);
 //var that = new EventPublisher();
@@ -57,12 +58,10 @@ var style = new ol.style.Style({
 });
 
 var getColor = function(value){
-  console.log(value);
    var red = 255*value*1.5;
    var green = 255-red;
-   var color="rgba(" + red + ", " + green + ", 0, 0.5)";
+   var color="rgba(" + red + ", " + green + ", 0, 0.6)";
 
-   console.log(color);
    var style = new ol.style.Style({
      fill: new ol.style.Fill({
        color:color
@@ -75,6 +74,7 @@ var getColor = function(value){
   regions.getSource().on('addfeature', function(event) {
     var name = event.feature.get('name');
     var value;
+	  console.log(parsedData);
     for(var i  = 0; i < parsedData.length; i++){
       if( parsedData[i].key === name){
         value = parsedData[i].dataValue;
@@ -84,6 +84,7 @@ var getColor = function(value){
     event.feature.setStyle(getColor(value));
 
   })
+
 
 
 Earthquakes.ChangeDataControl = function(opt_options) {
@@ -162,7 +163,7 @@ var info = $('#info');
   var displayFeatureInfo = function(pixel) {
     info.css({
       left: pixel[0] + 'px',
-      top: (pixel[1] - 15) + 'px'
+      top: (pixel[1] + 220) + 'px'
     });
     var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
       return feature;
@@ -172,10 +173,13 @@ var info = $('#info');
           .attr('data-original-title', feature.get('name'))
           .tooltip('fixTitle')
           .tooltip('show');
+
+		
     } else {
       info.tooltip('hide');
     }
   };
+
 
   map.on('pointermove', function(evt) {
     if (evt.dragging) {
@@ -186,18 +190,20 @@ var info = $('#info');
   });
 
   function changeLayoutToFearBigOne() {
-    regions.getSource().clear();
-    regions.getSource().refresh({force:true});
+    parser.dataParser(isLoaded, 0);
   }
 
 
+
+
   function changeLayoutToFearGeneral() {
-    parsedData = {};
+	  parser.dataParser(isLoaded, 1);
     // Custom Event erzeugen->triggered, wenn daten geladen
 
   }
 
   function changeLayoutToWitnessedEarthquakes() {
+	  parser.binaryDataParser(isLoaded, 2);
 
   }
 
