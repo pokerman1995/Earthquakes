@@ -1,5 +1,6 @@
 var Earthquakes = Earthquakes || {};
 var parsedData;
+var earthquakes_per_region={};
 var isLoaded = function(data){
   parsedData = data;
   regions.getSource().clear();
@@ -12,6 +13,8 @@ parser.dataParser(isLoaded, 0);
 var blur = document.getElementById('blur');
 var radius = document.getElementById('radius');
 var userInputController;
+var findDate = /(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])/gi;
+
 
 var vector = new ol.layer.Heatmap({
     source: new ol.source.Vector({
@@ -29,13 +32,40 @@ vector.getSource().on('addfeature', function(event) {
     // standards-violating <magnitude> tag in each Placemark.  We extract it from
     // the Placemark's name instead.
     var name = event.feature.get('name');
-
+	var earthquake = {};
+	var description = event.feature.get('description');
+	var year = description.match(findDate)[0].substr(0,4);
     var magnitude = parseFloat(name.substr(2));
     event.feature.set('weight', magnitude);
+	var position = event.feature.getGeometry().getCoordinates();
+
+	var feature = regions.getSource().getFeaturesAtCoordinate(position)[0];
+	if(!(feature === undefined)){
+
+		var region = feature.get('name');
+
+		var earthquakes_per_year = [];
+		if(!(region in earthquakes_per_region)){
+			for(var i = 0; i <= 30; i++){
+				var obj = {};
+				var yearOld = 1988 + i;
+				obj.year = yearOld;
+				obj.n = 0;
+				earthquakes_per_year.push(obj);
+
+			}
+			earthquakes_per_region[region] = earthquakes_per_year;
+		}
+		earthquakes_per_year = earthquakes_per_region[region];
+		for(var i = 0; i < earthquakes_per_year.length; i++){
+			if(earthquakes_per_year[i].year == year){
+				earthquakes_per_year[i].n = earthquakes_per_year[i].n+1;
+			}
+		}
+	}
   });
 
-
-
+console.log(earthquakes_per_region);
 
 var raster = new ol.layer.Tile({
     source: new ol.source.OSM()
@@ -131,6 +161,7 @@ Earthquakes.ChangeDataControl = function(opt_options) {
 
 
 
+
   var map = new ol.Map({
     controls: ol.control.defaults({
       attributionOptions: {
@@ -160,10 +191,7 @@ var info = $('#info');
     trigger: 'manual'
   });
 
-var diagram = $('#map');
-var test = document.createElement('div');
-test.setAttribute('id', 'test');
-test.innerHTML="Click for more information.";
+var diagram = document.createElement('svg');
 
   var displayFeatureInfo = function(pixel) {
     info.css({
@@ -179,8 +207,12 @@ test.innerHTML="Click for more information.";
           .tooltip('fixTitle')
           .tooltip('show');
 		
-		$('.tooltip-inner').click(function(){
-			$('.tooltip-inner').append(test);
+		$('#map').click(function(){
+			$('.tooltip-inner').append(diagram);
+			var featureName = feature.get('name');
+			if( featureName in earthquakes_per_region){
+				showEarthquakesPerYear(featureName);
+			}
 		})
 
 		
@@ -204,7 +236,6 @@ test.innerHTML="Click for more information.";
 
 
 
-
   function changeLayoutToFearGeneral() {
 	  parser.dataParser(isLoaded, 1);
     // Custom Event erzeugen->triggered, wenn daten geladen
@@ -215,6 +246,30 @@ test.innerHTML="Click for more information.";
 	  parser.binaryDataParser(isLoaded, 2);
 
   }
+
+var showEarthquakesPerYear = function(region){
+	var earthquakes_per_year = earthquakes_per_region[region];
+    var margin = 20,
+        width = 300, 
+		barHeight = 20;
+	
+	var svg = d3.select("svg").attr("width", width).attr("height", barHeight*earthquakes_per_year.length);
+
+
+
+    var xScale = d3.scaleLinear().domain([1988, 2018]).range([0, width]);
+        //yScale = d3.scaleLinear().range([height, 0]);
+
+
+	var bar = svg.selectAll("g")
+		.data(earthquakes_per_year)
+	  .enter().append("g")
+		.attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
+
+	bar.append("rect")
+		.attr("width", 100)
+		.attr("height", function(d){return d.n;});
+}
 
 
   function init () {

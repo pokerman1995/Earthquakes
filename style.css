@@ -7,9 +7,12 @@ header p{
 }
 #info {
    position: absolute;
-   height: 1px;
-   width: 1px;
    z-index: 100;
+	text-align: center;
+}
+
+.bar {
+   fill: steelblue;
 }
 
 .tooltip-inner{
