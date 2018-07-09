@@ -44,6 +44,10 @@ header p{
 	border-top-color: #4A74A8;
 }
 
+.map{
+	height: 530px;
+}
+
 
 #menue {
 	width: 100%;
@@ -86,4 +90,15 @@ header p{
     width: 80%;
     margin-top: 5px;
   }
+}
+
+#sizeSettings {
+	margin: 10px;
+	background-color: #4a74a8;
+	width: 20%;
+}
+
+#sizeSettings label{
+	margin-left: 4px;
+	color:white;
 }
