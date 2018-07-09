@@ -5,6 +5,12 @@ header{
 header p{
   color: white;
 }
+
+.popover {
+	width: 520px;
+	height: 350px;
+	max-width: 520px;
+}
 #info {
    position: absolute;
    z-index: 100;

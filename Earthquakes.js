@@ -207,13 +207,13 @@ var diagram = document.createElement('svg');
           .tooltip('fixTitle')
           .tooltip('show');
 		
-		$('#map').click(function(){
-			$('.tooltip-inner').append(diagram);
-			var featureName = feature.get('name');
-			if( featureName in earthquakes_per_region){
-				showEarthquakesPerYear(featureName);
-			}
-		})
+//		$('#map').click(function(){
+//			$('.tooltip-inner').append(diagram);
+//			var featureName = feature.get('name');
+//			if( featureName in earthquakes_per_region){
+//				showEarthquakesPerYear(featureName);
+//			}
+//		})
 
 		
     } else {
@@ -249,9 +249,9 @@ var diagram = document.createElement('svg');
 
 var showEarthquakesPerYear = function(region){
 	var earthquakes_per_year = earthquakes_per_region[region];
-    var margin = {top: 20, right: 20, bottom: 30, left: 40},
-        width = 960 - margin.left - margin.right,
-        height = 500;
+    var margin = {top: 10, right: 10, bottom: 40, left: 30},
+        width = 480 - margin.left - margin.right,
+        height = 250;
 	
 	    var svg = d3.select("svg")
         .attr("width", width + margin.left + margin.right)
@@ -274,7 +274,12 @@ var showEarthquakesPerYear = function(region){
 	 svg.append("g")
           .attr("class", "x axis")
           .attr("transform", "translate(0," + height + ")")
-          .call(xAxis);
+          .call(xAxis)
+		  .selectAll("text")
+		  .attr("transform", "rotate(90)")
+		  .attr("dx", "20px")
+		  .attr("dy", "-10px");
+
 
       svg.append("g")
           .attr("class", "y axis")
@@ -296,18 +301,13 @@ var showEarthquakesPerYear = function(region){
           .attr("y", function(d) { return yScale(d.n); })
           .attr("height", function(d) { return height - yScale(d.n); });
 
-
-//	var bar = svg.selectAll("g")
-//		.data(earthquakes_per_year)
-//	  .enter().append("g")
-//		.attr("transform", function(d, i) { return "translate(" + i * 50 + ", 0)"; });
-//
-//	bar.append("rect")
-//		.attr("x", function(d){return xScale[d.year];})
-//		.attr("y", function(d){return yScale[d.n]})
-//		.attr("width", 20)
-//		.attr("height", function(d){return d.n*3;});
 }
+
+var container = document.getElementById("popup");
+var popup = new ol.Overlay({
+        element: container
+      });
+      map.addOverlay(popup);
 
 
   function init () {
@@ -319,7 +319,30 @@ var showEarthquakesPerYear = function(region){
 
   map.on('click', function(evt) {
     displayFeatureInfo(evt.pixel);
+	  
+	  var element = popup.getElement();
+        var coordinate = evt.coordinate;
 
+        $(element).popover('destroy');
+        popup.setPosition(coordinate);
+        $(element).popover({
+          placement: 'top',
+          animation: false,
+          html: true,
+			content: "<svg></svg>"
+        });
+
+        $(element).popover('show');
+	    var feature = regions.getSource().getFeaturesAtCoordinate(coordinate)[0];
+	  	if(feature !== undefined){
+			var name = feature.get('name');
+			showEarthquakesPerYear(name);
+	    	document.getElementById("#popup").setAttribute("title", "Earthquakes per year");
+
+		}else{
+			$(element).popover('destroy');
+
+		}
 
 
 });
