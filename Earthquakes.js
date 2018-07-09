@@ -249,26 +249,64 @@ var diagram = document.createElement('svg');
 
 var showEarthquakesPerYear = function(region){
 	var earthquakes_per_year = earthquakes_per_region[region];
-    var margin = 20,
-        width = 300, 
-		barHeight = 20;
+    var margin = {top: 20, right: 20, bottom: 30, left: 40},
+        width = 960 - margin.left - margin.right,
+        height = 500;
 	
-	var svg = d3.select("svg").attr("width", width).attr("height", barHeight*earthquakes_per_year.length);
+	    var svg = d3.select("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+		.append('g')
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
+    var xScale = d3.scaleBand().range([0, width]),
+        yScale = d3.scaleLinear().range([height, 0]);
+	
+	var xAxis = d3.axisBottom(xScale);
+	var yAxis = d3.axisLeft(yScale).ticks(20);
+	
+	xScale.domain(earthquakes_per_year.map(function(d){ return d.year;}))
+		      	.paddingInner(0.1)
+      	.paddingOuter(0.5);
+	yScale.domain([0, d3.max(earthquakes_per_year, function(d) { return d.n; })]);
+	
+	 svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis);
 
-    var xScale = d3.scaleLinear().domain([1988, 2018]).range([0, width]);
-        //yScale = d3.scaleLinear().range([height, 0]);
+      svg.append("g")
+          .attr("class", "y axis")
+          .call(yAxis)
+        .append("text")
+          .attr("class", "label")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 6)
+          .attr("dy", ".71em")
+          .style("text-anchor", "end")
+          .text("Frequency");
+
+      svg.selectAll(".bar")
+          .data(earthquakes_per_year)
+        .enter().append("rect")
+          .attr("class", "bar")
+          .attr("x", function(d) { return xScale(d.year); })
+          .attr("width", xScale.bandwidth())
+          .attr("y", function(d) { return yScale(d.n); })
+          .attr("height", function(d) { return height - yScale(d.n); });
 
 
-	var bar = svg.selectAll("g")
-		.data(earthquakes_per_year)
-	  .enter().append("g")
-		.attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
-
-	bar.append("rect")
-		.attr("width", 100)
-		.attr("height", function(d){return d.n;});
+//	var bar = svg.selectAll("g")
+//		.data(earthquakes_per_year)
+//	  .enter().append("g")
+//		.attr("transform", function(d, i) { return "translate(" + i * 50 + ", 0)"; });
+//
+//	bar.append("rect")
+//		.attr("x", function(d){return xScale[d.year];})
+//		.attr("y", function(d){return yScale[d.n]})
+//		.attr("width", 20)
+//		.attr("height", function(d){return d.n*3;});
 }
 
 

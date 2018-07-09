@@ -11,9 +11,19 @@ header p{
 	text-align: center;
 }
 
-.bar {
-   fill: steelblue;
-}
+    .bar {
+      fill: steelblue;
+    }
+
+    .bar:hover {
+      fill: brown;
+    }
+
+    .label {
+      fill: black;
+      font: 10px sans-serif;
+      text-anchor: middle;
+    }
 
 .tooltip-inner{
 	background-color: #4A74A8;
