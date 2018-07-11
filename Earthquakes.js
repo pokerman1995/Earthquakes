@@ -196,7 +196,7 @@ var diagram = document.createElement('svg');
   var displayFeatureInfo = function(pixel) {
     info.css({
       left: pixel[0] + 'px',
-      top: (pixel[1] + 160) + 'px'
+      top: (pixel[1] + 140) + 'px'
     });
     var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
       return feature;
@@ -206,7 +206,7 @@ var diagram = document.createElement('svg');
           .attr('data-original-title', feature.get('name'))
           .tooltip('fixTitle')
           .tooltip('show');
-		
+
 //		$('#map').click(function(){
 //			$('.tooltip-inner').append(diagram);
 //			var featureName = feature.get('name');
@@ -215,7 +215,7 @@ var diagram = document.createElement('svg');
 //			}
 //		})
 
-		
+
     } else {
       info.tooltip('hide');
     }
@@ -252,7 +252,7 @@ var showEarthquakesPerYear = function(region){
     var margin = {top: 10, right: 10, bottom: 40, left: 30},
         width = 480 - margin.left - margin.right,
         height = 250;
-	
+
 	    var svg = d3.select("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -262,15 +262,15 @@ var showEarthquakesPerYear = function(region){
 
     var xScale = d3.scaleBand().range([0, width]),
         yScale = d3.scaleLinear().range([height, 0]);
-	
+
 	var xAxis = d3.axisBottom(xScale);
 	var yAxis = d3.axisLeft(yScale).ticks(20);
-	
+
 	xScale.domain(earthquakes_per_year.map(function(d){ return d.year;}))
 		      	.paddingInner(0.1)
       	.paddingOuter(0.5);
 	yScale.domain([0, d3.max(earthquakes_per_year, function(d) { return d.n; })]);
-	
+
 	 svg.append("g")
           .attr("class", "x axis")
           .attr("transform", "translate(0," + height + ")")
@@ -319,7 +319,7 @@ var popup = new ol.Overlay({
 
   map.on('click', function(evt) {
     displayFeatureInfo(evt.pixel);
-	  
+
 	  var element = popup.getElement();
         var coordinate = evt.coordinate;
 
@@ -338,10 +338,6 @@ var popup = new ol.Overlay({
 			var name = feature.get('name');
 			showEarthquakesPerYear(name);
 	    	document.getElementById("#popup").setAttribute("title", "Earthquakes per year");
-
-		}else{
-			$(element).popover('destroy');
-
 		}
 
 
