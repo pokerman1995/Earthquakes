@@ -86,20 +86,22 @@ var style = new ol.style.Style({
 });
 
 var getColor = function(value){
-   var red = 255*value*1.5;
-   var green = 255-red;
-   var color="rgba(" + red + ", " + green + ", 0, 0.6)";
+   var color="rgba(254,240,217,0.5)";;
 
    var style = new ol.style.Style({
      fill: new ol.style.Fill({
        color:color
-     })
+     }),
+	   stroke: new ol.style.Stroke({
+		   color:'black',
+		   width: 0.5
+	   })
    });
    return style;
 }
 
 
-  regions.getSource().on('addfeature', function(event) {
+ regions.getSource().on('addfeature', function(event) {
     var name = event.feature.get('name');
     var value;
     for(var i  = 0; i < parsedData.length; i++){
@@ -164,9 +166,11 @@ Earthquakes.ChangeDataControl = function(opt_options) {
       attributionOptions: {
         collapsible: false
       }
-    }).extend([
+    }),
+	  /*.extend([
       new Earthquakes.ChangeDataControl()
-    ]),
+    ]),*/
+	  
     layers: [raster, regions, vector ],
     target: 'map',
     view: new ol.View({
@@ -193,7 +197,7 @@ var diagram = document.createElement('svg');
   var displayFeatureInfo = function(pixel) {
     info.css({
       left: pixel[0] + 'px',
-      top: (pixel[1] + 140) + 'px'
+      top: (pixel[1]) + 'px'
     });
     var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
       return feature;
@@ -317,7 +321,7 @@ var popup = new ol.Overlay({
   map.on('click', function(evt) {
     displayFeatureInfo(evt.pixel);
 
-	  var element = popup.getElement();
+	 /* var element = popup.getElement();
         var coordinate = evt.coordinate;
 
         $(element).popover('destroy');
@@ -335,7 +339,7 @@ var popup = new ol.Overlay({
 			var name = feature.get('name');
 			showEarthquakesPerYear(name);
 	    	document.getElementById("#popup").setAttribute("title", "Earthquakes per year");
-		}
+		}*/
 
 
 });
@@ -409,10 +413,10 @@ var arc = d3.arc()
     .endAngle(function(d) { return d.x1; })
     .innerRadius(function(d) { return Math.sqrt(d.y0); })
     .outerRadius(function(d) { return Math.sqrt(d.y1); });
-
+var json;
 d3.text("data/earthquake_data.csv", function(text) {
   var csv = d3.csvParseRows(text);
-  var json = parser.buildHierarchy(csv);
+  json = parser.buildHierarchy(csv);
   createVisualization(json);
 });
 
@@ -442,11 +446,11 @@ function createVisualization(json){
       .attr("d", arc)
       .attr("fill-rule", "evenodd")
       .style("fill", function(d) { return colors[d.data.name]; })
-      .style("opacity", 1);
-      //.on("mouseover", mouseover);
+      .style("opacity", 1)
+      .on("mouseover", mouseover);
 
   // Add the mouseleave handler to the bounding circle.
-  //d3.select("#container").on("mouseleave", mouseleave);
+  d3.select("#chart").on("mouseleave", mouseleave);
 
   // Get total size of the tree = value of root node from partition.
   totalSize = path.datum().value;
@@ -454,22 +458,35 @@ function createVisualization(json){
 
 // Fade all but the current sequence, and show it in the breadcrumb trail.
 function mouseover(d) {
+	
+  var features = regions.getSource().getFeatures();
+  var regionData = d.data.regions;
 
-  var percentage = (100 * d.value / totalSize).toPrecision(3);
-  var percentageString = percentage + "%";
-  if (percentage < 0.1) {
-    percentageString = "< 0.1%";
+  
+  if(regionData !== undefined){
+	 var maxValue = d3.max(regionData, function(d){
+	 return d.number;
+		 });
+	 for(var i = 0; i < features.length; i++){
+		 var featureName = features[i].get('name');
+		 var currentRegion = regionData.find(obj => {
+			 return obj.name === featureName;
+		 })
+		 var style = features[i].getStyle();
+		 console.log(style);
+		 var fill = getStyle(currentRegion["number"], maxValue);
+		 style.setFill(fill);
+		 features[i].setStyle(style);
+
+		 
+	 } 
+	 //regions.getSource().clear();
+	  //regions.getSource().addFeatures(features);
   }
-
-  d3.select("#percentage")
-      .text(percentageString);
-
-  d3.select("#explanation")
-      .style("visibility", "");
+	
 
   var sequenceArray = d.ancestors().reverse();
   sequenceArray.shift(); // remove root node from the array
-  updateBreadcrumbs(sequenceArray, percentageString);
 
   // Fade all the segments.
   d3.selectAll("path")
@@ -504,4 +521,28 @@ function mouseleave(d) {
 
   d3.select("#explanation")
       .style("visibility", "hidden");
+}
+
+function getStyle(value, maxValue){
+	var division = value/maxValue;
+	var color;
+	if(division < 0.2){
+	   color="rgba(254,240,217,0.5)";
+	}else if (division < 0.4){
+			   color="rgba(253,204,138,0.5)";
+
+	}else if(division < 0.6){
+			   color="rgba(252,141,89,0.5)";
+
+	}else if(division < 0.8){
+			   color="rgba(227,74,51,0.5)";
+
+	}else{
+			   color="rgba(179,0,0,0.5)";
+
+	}
+	 
+     return new ol.style.Fill({
+       color:color
+   });
 }
