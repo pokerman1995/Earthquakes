@@ -52,7 +52,6 @@ var EarthquakeDataProcesser = function(){
                 return value;
             });
         }
-        console.log(parsedData);
         parsedData = cleanEmptyData(parsedData);
         isLoaded(parsedData);
   });
@@ -91,6 +90,36 @@ var binaryDataParser = function (isLoaded, dataColumn) {
   isLoaded(parsedData);
 });
 }
+
+function buildHierarchy(csv){	
+	var root = {"name": "root", "children": []};
+	var children = root["children"];
+	// Header Parsen und children erzeugen.
+	for(var i = 0; i < 7; i++){
+		children.push({"name": csv[0][i], "children": []});
+	}
+	for (var i = 1; i < csv.length; i++){
+		// Only parse answers regarding earthquakes, not age etc.
+		for(var j = 0; j < 7; j++){
+			var question = children[j];
+			var answer = csv[i][j];
+			if(answer === ""){
+				answer = "No answer";
+			}
+			var questionChildren = question["children"];
+			var questionChild = questionChildren.find(obj => {
+				return obj.name === answer;
+			})
+			if(questionChild === undefined){
+				questionChild = {"name": answer, "size": 0};
+				questionChildren.push(questionChild);
+			}
+			questionChild["size"] += 1;
+		}
+	}
+	return root;
+}
+  that.buildHierarchy = buildHierarchy;
   that.binaryDataParser = binaryDataParser;
   that.dataParser = dataParser;
   return that;

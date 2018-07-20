@@ -45,7 +45,20 @@ header p{
 }
 
 .map{
-	height: 530px;
+	
+  position: absolute;
+  top: 150px;
+  left: 140px;
+  width: 460px;
+	height: 460px;
+  text-align: center;
+  color: #666;
+  z-index: 1;
+	border-radius: 50%;
+}
+
+#map div{
+	border-radius: 50%;
 }
 
 
@@ -102,3 +115,18 @@ header p{
 	margin-left: 4px;
 	color:white;
 }
+
+
+#chart {	
+	position: relative;
+    height: 1500px;
+    width: 1500px;
+    margin: 0px 0 0 -220px;
+    top: 50%;
+    left: 40%;
+}
+
+#chart path {
+  stroke: #fff;
+}
+

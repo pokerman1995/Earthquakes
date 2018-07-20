@@ -7,8 +7,8 @@ var isLoaded = function(data){
 }
 var parser = new EarthquakeDataProcesser();
 parser.dataParser(isLoaded, 0);
-//parser.dataParser(isLoaded, 1);
-//parser.binaryDataParser(isLoaded, 2);
+parser.dataParser(isLoaded, 1);
+parser.binaryDataParser(isLoaded, 2);
 //var that = new EventPublisher();
 var blur = document.getElementById('blur');
 var radius = document.getElementById('radius');
@@ -65,8 +65,6 @@ vector.getSource().on('addfeature', function(event) {
 	}
   });
 
-console.log(earthquakes_per_region);
-
 var raster = new ol.layer.Tile({
     source: new ol.source.OSM()
   });
@@ -104,7 +102,6 @@ var getColor = function(value){
   regions.getSource().on('addfeature', function(event) {
     var name = event.feature.get('name');
     var value;
-	  console.log(parsedData);
     for(var i  = 0; i < parsedData.length; i++){
       if( parsedData[i].key === name){
         value = parsedData[i].dataValue;
@@ -174,7 +171,7 @@ Earthquakes.ChangeDataControl = function(opt_options) {
     target: 'map',
     view: new ol.View({
       center: ol.proj.fromLonLat([-97, 38]),
-      zoom: 5
+      zoom: 3.4
     })
   });
 
@@ -342,3 +339,169 @@ var popup = new ol.Overlay({
 
 
 });
+
+
+
+
+
+
+
+
+
+var width = document.getElementById("chart").offsetWidth/2;
+var height = width;
+var radius = Math.min(width, height) / 2;
+
+// Breadcrumb dimensions: width, height, spacing, width of tip/tail.
+var b = {
+  w: 75, h: 30, s: 3, t: 10
+};
+
+// Mapping of step names to colors.
+var colors = {
+  "In general, how worried are you about earthquakes?": "#5687d1",
+  "How worried are you about the Big One, a massive, catastrophic earthquake?": "#7b615c",
+  "Do you think the \"Big One\" will occur in your lifetime?": "#de783b",
+  "Have you ever experienced an earthquake?": "#6ab975",
+  "Have you or anyone in your household taken any precautions for an earthquake (packed an earthquake survival kit, prepared an evacuation plan, etc.)?": "#a173d1",
+  "How familiar are you with the San Andreas Fault line?": "#bbbbbb",
+  "How familiar are you with the Yellowstone Supervolcano?": "#c3da23",
+	
+  "Not at all worried": "#158d2a",
+  "Not at all familiar": "#158d2a",
+
+  "Somewhat worried": "#fa8876",
+  "Somewhat familiar": "#fa8876",
+
+  "Not so worried": "#f41dcf",
+  "Not so familiar": "#f41dcf",
+
+  "Very worried": "#63805d",
+  "Very familiar": "#63805d",
+
+  "Extremely worried": "#5d4d0b",
+  "Extremely familiar": "#5d4d0b",
+	
+  "No": "#163aae",
+  "Yes": "#e9a45f",
+	
+  "Yes, one or more minor ones": "#d5a0f8",
+  "Yes, one or more major ones": "#b9fb6f",
+	
+  "No answer": "#5cfbe4"	
+};
+
+// Total size of all segments; we set this later, after loading the data.
+var totalSize = 0; 
+
+var vis = d3.select("#chart").append("svg:svg")
+    .attr("width", width)
+    .attr("height", height)
+    .append("svg:g")
+    .attr("id", "container")
+    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var partition = d3.partition()
+    .size([2 * Math.PI, radius * radius]);
+
+var arc = d3.arc()
+    .startAngle(function(d) { return d.x0; })
+    .endAngle(function(d) { return d.x1; })
+    .innerRadius(function(d) { return Math.sqrt(d.y0); })
+    .outerRadius(function(d) { return Math.sqrt(d.y1); });
+
+d3.text("data/earthquake_data.csv", function(text) {
+  var csv = d3.csvParseRows(text);
+  var json = parser.buildHierarchy(csv);
+  createVisualization(json);
+});
+
+function createVisualization(json){
+	console.log(json);
+  // Bounding circle underneath the sunburst, to make it easier to detect
+  // when the mouse leaves the parent g.
+  vis.append("svg:circle")
+      .attr("r", radius)
+      .style("opacity", 0);
+
+  // Turn the data into a d3 hierarchy and calculate the sums.
+  var root = d3.hierarchy(json)
+      .sum(function(d) { return d.size; })
+      .sort(function(a, b) { return b.value - a.value; });
+	
+	  // For efficiency, filter nodes to keep only those large enough to see.
+  var nodes = partition(root).descendants()
+      .filter(function(d) {
+          return (d.x1 - d.x0 > 0.005); // 0.005 radians = 0.29 degrees
+      });
+  
+  var path = vis.data([json]).selectAll("path")
+      .data(nodes)
+      .enter().append("svg:path")
+      .attr("display", function(d) { return d.depth ? null : "none"; })
+      .attr("d", arc)
+      .attr("fill-rule", "evenodd")
+      .style("fill", function(d) { return colors[d.data.name]; })
+      .style("opacity", 1);
+      //.on("mouseover", mouseover);
+
+  // Add the mouseleave handler to the bounding circle.
+  //d3.select("#container").on("mouseleave", mouseleave);
+
+  // Get total size of the tree = value of root node from partition.
+  totalSize = path.datum().value;
+};
+
+// Fade all but the current sequence, and show it in the breadcrumb trail.
+function mouseover(d) {
+
+  var percentage = (100 * d.value / totalSize).toPrecision(3);
+  var percentageString = percentage + "%";
+  if (percentage < 0.1) {
+    percentageString = "< 0.1%";
+  }
+
+  d3.select("#percentage")
+      .text(percentageString);
+
+  d3.select("#explanation")
+      .style("visibility", "");
+
+  var sequenceArray = d.ancestors().reverse();
+  sequenceArray.shift(); // remove root node from the array
+  updateBreadcrumbs(sequenceArray, percentageString);
+
+  // Fade all the segments.
+  d3.selectAll("path")
+      .style("opacity", 0.3);
+
+  // Then highlight only those that are an ancestor of the current segment.
+  vis.selectAll("path")
+      .filter(function(node) {
+                return (sequenceArray.indexOf(node) >= 0);
+              })
+      .style("opacity", 1);
+}
+
+// Restore everything to full opacity when moving off the visualization.
+function mouseleave(d) {
+
+  // Hide the breadcrumb trail
+  d3.select("#trail")
+      .style("visibility", "hidden");
+
+  // Deactivate all segments during transition.
+  d3.selectAll("path").on("mouseover", null);
+
+  // Transition each segment to full opacity and then reactivate it.
+  d3.selectAll("path")
+      .transition()
+      .duration(1000)
+      .style("opacity", 1)
+      .on("end", function() {
+              d3.select(this).on("mouseover", mouseover);
+            });
+
+  d3.select("#explanation")
+      .style("visibility", "hidden");
+}
