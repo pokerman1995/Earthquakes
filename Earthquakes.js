@@ -1,6 +1,9 @@
 var Earthquakes = Earthquakes || {};
 var parsedData;
+var earthquakes = [];
+var filteredEarthquakes = [];
 var earthquakes_per_region={};
+var earthquake_list = [];
 var isLoaded = function(data){
   parsedData = data;
   regions.getSource().clear();
@@ -38,12 +41,12 @@ vector.getSource().on('addfeature', function(event) {
     var magnitude = parseFloat(name.substr(2));
     event.feature.set('weight', magnitude);
 	var position = event.feature.getGeometry().getCoordinates();
+	earthquake_list.push(event.feature);
 
 	var feature = regions.getSource().getFeaturesAtCoordinate(position)[0];
 	if(!(feature === undefined)){
 
 		var region = feature.get('name');
-
 		var earthquakes_per_year = [];
 		if(!(region in earthquakes_per_region)){
 			for(var i = 0; i <= 30; i++){
@@ -51,6 +54,7 @@ vector.getSource().on('addfeature', function(event) {
 				var yearOld = 1988 + i;
 				obj.year = yearOld;
 				obj.n = 0;
+				obj.name = region;
 				earthquakes_per_year.push(obj);
 
 			}
@@ -64,6 +68,7 @@ vector.getSource().on('addfeature', function(event) {
 		}
 	}
   });
+
 
 var raster = new ol.layer.Tile({
     source: new ol.source.OSM()
@@ -171,13 +176,20 @@ Earthquakes.ChangeDataControl = function(opt_options) {
       new Earthquakes.ChangeDataControl()
     ]),*/
 	  
-    layers: [raster, regions, vector ],
+    layers: [raster, regions, vector],
     target: 'map',
     view: new ol.View({
       center: ol.proj.fromLonLat([-97, 38]),
       zoom: 3.4
     })
   });
+
+map.once('postcompose', function(event){
+	setTimeout(function(){
+		console.log("Waiting");
+		drawTimeline();
+	}, 2000);
+});
 
   blur.addEventListener('input', function() {
     vector.setBlur(parseInt(blur.value, 10));
@@ -249,6 +261,7 @@ var diagram = document.createElement('svg');
   }
 
 var showEarthquakesPerYear = function(region){
+	
 	var earthquakes_per_year = earthquakes_per_region[region];
     var margin = {top: 10, right: 10, bottom: 40, left: 30},
         width = 480 - margin.left - margin.right,
@@ -421,7 +434,6 @@ d3.text("data/earthquake_data.csv", function(text) {
 });
 
 function createVisualization(json){
-	console.log(json);
   // Bounding circle underneath the sunburst, to make it easier to detect
   // when the mouse leaves the parent g.
   vis.append("svg:circle")
@@ -473,7 +485,6 @@ function mouseover(d) {
 			 return obj.name === featureName;
 		 })
 		 var style = features[i].getStyle();
-		 console.log(style);
 		 var fill = getStyle(currentRegion["number"], maxValue);
 		 style.setFill(fill);
 		 features[i].setStyle(style);
@@ -546,3 +557,162 @@ function getStyle(value, maxValue){
        color:color
    });
 }
+
+
+
+
+
+
+
+function drawTimeline(){
+	d3.select("#timelineChart").remove();
+	var margin = {top: 10, right: 80, bottom: 80, left: 80},
+    width = document.getElementById("chart").offsetWidth-margin.left -margin.top,
+	height = 400-margin.right -margin.bottom;
+	
+	for(var region in earthquakes_per_region){
+		if(earthquakes_per_region.hasOwnProperty(region)){
+			var years = [];
+			for(var year in earthquakes_per_region[region]){
+				if(earthquakes_per_region[region].hasOwnProperty(year))
+				years.push(earthquakes_per_region[region][year]);
+			}
+			earthquakes.push(years);
+		}
+	}
+
+	
+	
+	
+// Scales and axes. Note the inverted domain for the y-scale: bigger is up!
+var x = d3.scaleBand().range([0, width]),
+    y = d3.scaleLinear().range([height, 0]),
+    xAxis = d3.axisBottom(x).tickSize(1),
+    yAxis = d3.axisLeft(y).tickArguments(4);
+
+// An area generator, for the light fill.
+var area = d3.area()
+    .curve(d3.curveMonotoneX)
+    .x(function(d) { return x(d.year); })
+    .y0(height)
+    .y1(function(d) { return y(d.n); });
+
+// A line generator, for the dark stroke.
+var line = d3.line()
+    .curve(d3.curveMonotoneX)
+    .x(function(d) { return x(d.year); })
+    .y(function(d) { return y(d.n); });
+	
+	  // Compute the minimum and maximum date, and the maximum price.
+	var minYear = d3.min(earthquakes, function(d){
+	  return d3.min(d, function(e){
+		  return e.year;})});
+	var maxYear = d3.max(earthquakes, function(d){
+	  return d3.max(d, function(e){
+		  return e.year;})})
+  x.domain(earthquakes[0].map(function(d){return d.year}));
+  y.domain([0, d3.max(earthquakes, function(d) {
+	  return d3.max(d, function(e){
+		  return e.n; })})]).nice();
+	
+	
+	  var svg = d3.select("#timeline").append("svg:svg")
+	  .attr("id", "timelineChart")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
+  // Add the clip path.
+  svg.append("clipPath")
+      .attr("id", "clip")
+    .append("rect")
+      .attr("width", width)
+      .attr("height", height);
+
+  // Add the x-axis.
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(-25," + height + ")")
+      .call(xAxis);
+	
+	var a = d3.selectAll('.x.axis .tick')
+    .on('click',showFilteredYears);
+	console.log(a);
+
+  // Add the y-axis.
+  svg.append("g")
+      .attr("class", "y axis")
+      .attr("transform", "translate(" + width-25 + ",0)")
+      .call(yAxis);
+	
+	console.log(filteredEarthquakes);
+	if(filteredEarthquakes.length != 0){
+		
+	  var colors = d3.scaleOrdinal(d3.schemeCategory10);
+  svg.selectAll('.line')
+    .data(filteredEarthquakes)
+    .enter()
+      .append('path')
+        .attr('class', 'line')
+        .style('stroke', function(d) {
+          return colors(Math.random() * 50);
+        })
+        .attr('clip-path', 'url(#clip)')
+        .attr('d', function(d) {
+          return line(d);
+        })
+	
+	  /* Add 'curtain' rectangle to hide entire graph */
+  var curtain = svg.append('rect')
+    .attr('x', -1 * width)
+    .attr('y', -1 * height)
+    .attr('height', height)
+    .attr('width', width)
+    .attr('class', 'curtain')
+    .attr('transform', 'rotate(180)')
+    .style('fill', '#ffffff');
+    
+    
+  /* Create a shared transition for anything we're animating */
+  var t = svg.transition()
+    .delay(250)
+    .duration(4000)
+    .ease(d3.easeLinear)
+    .on('end', function() {
+      d3.select('line.guide')
+        .transition()
+        .style('opacity', 0)
+        .remove()
+    });
+  
+  t.select('rect.curtain')
+    .attr('width', 0);
+  t.select('line.guide')
+    .attr('transform', 'translate(' + width + ', 0)')
+		
+	}
+	
+
+
+}
+
+function showFilteredYears(selectedYear){
+	console.log(selectedYear);
+		
+filteredEarthquakes = [];
+earthquakes.forEach(function(d){
+  filteredEarthquakes.push(d.filter(function (object) {
+    var year = object.year;
+    return year <= selectedYear;
+  }));
+});
+	
+drawTimeline();
+	
+
+
+}
+
+
+
