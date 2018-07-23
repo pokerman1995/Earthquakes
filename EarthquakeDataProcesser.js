@@ -86,7 +86,6 @@ var binaryDataParser = function (isLoaded, dataColumn) {
             });
         }
   parsedData = cleanEmptyData(parsedData);
-  console.log(parsedData);
   isLoaded(parsedData);
 });
 }
