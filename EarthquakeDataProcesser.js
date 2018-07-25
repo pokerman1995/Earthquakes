@@ -132,6 +132,7 @@ function buildHierarchy(csv){
 			answerRegion["number"] += 1;
 		}
 	}
+	console.log(root);
 	return root;
 }
   that.buildHierarchy = buildHierarchy;

@@ -122,8 +122,7 @@ header p{
     height: 750px;
     width: 1500px;
     margin: 0px 0 0 -220px;
-    top: 50%;
-    left: 40%;
+    left: 15%;
 }
 
 #chart path {

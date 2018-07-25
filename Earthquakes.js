@@ -3,7 +3,6 @@ var parsedData;
 var earthquakes = [];
 var filteredEarthquakes = [];
 var earthquakes_per_region={};
-var earthquake_list = [];
 var isLoaded = function(data){
   parsedData = data;
   regions.getSource().clear();
@@ -13,21 +12,19 @@ parser.dataParser(isLoaded, 0);
 parser.dataParser(isLoaded, 1);
 parser.binaryDataParser(isLoaded, 2);
 //var that = new EventPublisher();
-var blur = document.getElementById('blur');
-var radius = document.getElementById('radius');
+//var blur = document.getElementById('blur');
+//var radius = document.getElementById('radius');
 var userInputController;
 var findDate = /(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])/gi;
 
 
-var vector = new ol.layer.Heatmap({
+var vector = new ol.layer.Vector({
     source: new ol.source.Vector({
       url: 'data/earthquakes.kml',
       format: new ol.format.KML({
         extractStyles: false
       })
     }),
-    blur: parseInt(blur.value, 10),
-    radius: parseInt(radius.value, 10)
   });
 
 vector.getSource().on('addfeature', function(event) {
@@ -35,16 +32,18 @@ vector.getSource().on('addfeature', function(event) {
     // standards-violating <magnitude> tag in each Placemark.  We extract it from
     // the Placemark's name instead.
     var name = event.feature.get('name');
+	event.feature.setStyle(new ol.style.Style({}));
 	var earthquake = {};
 	var description = event.feature.get('description');
 	var year = description.match(findDate)[0].substr(0,4);
     var magnitude = parseFloat(name.substr(2));
     event.feature.set('weight', magnitude);
 	var position = event.feature.getGeometry().getCoordinates();
-	earthquake_list.push(event.feature);
 
 	var feature = regions.getSource().getFeaturesAtCoordinate(position)[0];
 	if(!(feature === undefined)){
+		event.feature.set('year', year);
+
 
 		var region = feature.get('name');
 		var earthquakes_per_year = [];
@@ -84,11 +83,6 @@ var regions = new ol.layer.Vector({
     })
   });
 
-var style = new ol.style.Style({
-  fill: new ol.style.Fill({
-    color:'rgba(255,0,0,1)'
-  })
-});
 
 var getColor = function(value){
    var color="rgba(254,240,217,0.5)";;
@@ -185,19 +179,19 @@ Earthquakes.ChangeDataControl = function(opt_options) {
   });
 
 map.once('postcompose', function(event){
+
 	setTimeout(function(){
-		console.log("Waiting");
 		drawTimeline();
-	}, 2000);
+	}, 2500);
 });
 
-  blur.addEventListener('input', function() {
-    vector.setBlur(parseInt(blur.value, 10));
-  });
+//  blur.addEventListener('input', function() {
+//    vector.setBlur(parseInt(blur.value, 10));
+//  });
 
-  radius.addEventListener('input', function() {
-    vector.setRadius(parseInt(radius.value, 10));
-  });
+//  radius.addEventListener('input', function() {
+//    vector.setRadius(parseInt(radius.value, 10));
+//  });
 var info = $('#info');
   info.tooltip({
     animation: false,
@@ -365,6 +359,7 @@ var popup = new ol.Overlay({
 
 
 
+
 var width = document.getElementById("chart").offsetWidth/2;
 var height = width;
 var radius = Math.min(width, height) / 2;
@@ -426,6 +421,7 @@ var arc = d3.arc()
     .endAngle(function(d) { return d.x1; })
     .innerRadius(function(d) { return Math.sqrt(d.y0); })
     .outerRadius(function(d) { return Math.sqrt(d.y1); });
+console.log(arc);
 var json;
 d3.text("data/earthquake_data.csv", function(text) {
   var csv = d3.csvParseRows(text);
@@ -636,9 +632,8 @@ var line = d3.line()
       .attr("transform", "translate(-25," + height + ")")
       .call(xAxis);
 	
-	var a = d3.selectAll('.x.axis .tick')
+	d3.selectAll('.x.axis .tick')
     .on('click',showFilteredYears);
-	console.log(a);
 
   // Add the y-axis.
   svg.append("g")
@@ -646,7 +641,6 @@ var line = d3.line()
       .attr("transform", "translate(" + width-25 + ",0)")
       .call(yAxis);
 	
-	console.log(filteredEarthquakes);
 	if(filteredEarthquakes.length != 0){
 		
 	  var colors = d3.scaleOrdinal(d3.schemeCategory10);
@@ -698,7 +692,6 @@ var line = d3.line()
 }
 
 function showFilteredYears(selectedYear){
-	console.log(selectedYear);
 		
 filteredEarthquakes = [];
 earthquakes.forEach(function(d){
@@ -710,9 +703,89 @@ earthquakes.forEach(function(d){
 	
 drawTimeline();
 	
+	var features = vector.getSource().getFeatures();
+	var filteredFeatures = features.filter(function(d){
+		d.setStyle(new ol.style.Style({}));
+		return d.get('year') == selectedYear;
+	});
+	filteredFeatures.forEach(function(d){
+		setTimeout(function(){
+			console.log("timeout");
+					d.setStyle(getStyleEarthquakes(d));
+		flash(d);
+		}, 500);
 
+	})
 
 }
+
+var getStyleEarthquakes = function(feature){
+	return new ol.style.Style({
+		image: new ol.style.Circle({
+			radius: calculateRadius(feature.get('weight')),
+			fill: new ol.style.Fill({color: "#4A74A8"}),
+			stroke: new ol.style.Stroke({color: "#000000", width: 1})
+
+		})
+		
+	});
+}
+
+function calculateRadius(weight){
+	if(weight < 4.5){
+		return 5;
+	} else if(weight < 5){
+		return 8;
+	} else if(weight < 5.5){
+		return 10;
+	}else{
+		return 12;
+	}
+}
+
+
+
+
+
+
+
+
+      var duration = 3000;
+      function flash(feature) {
+        var start = new Date().getTime();
+        var listenerKey = map.on('postcompose', animate);
+
+        function animate(event) {
+          var vectorContext = event.vectorContext;
+          var frameState = event.frameState;
+          var flashGeom = feature.getGeometry().clone();
+          var elapsed = frameState.time - start;
+          var elapsedRatio = elapsed / duration;
+          // radius will be 5 at start and 30 at end.
+          var radius = ol.easing.easeOut(elapsedRatio) * 25 + 5;
+          var opacity = ol.easing.easeOut(1 - elapsedRatio);
+
+          var style = new ol.style.Style({
+            image: new ol.style.Circle({
+              radius: radius,
+              snapToPixel: false,
+              stroke: new ol.style.Stroke({
+                color: '#4A74A8',
+                width: 0.25 + opacity
+              })
+            })
+          });
+
+          vectorContext.setStyle(style);
+          vectorContext.drawGeometry(flashGeom);
+          if (elapsed > duration) {
+            ol.Observable.unByKey(listenerKey);
+            return;
+          }
+          // tell OpenLayers to continue postcompose animation
+          map.render();
+        }
+      }
 
 
 
