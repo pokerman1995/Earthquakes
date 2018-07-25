@@ -33,7 +33,7 @@ header p{
 
 .tooltip-inner{
 	background-color: #4A74A8;
-	
+
 }
 
 .tooltip-inner p{
@@ -45,12 +45,11 @@ header p{
 }
 
 .map{
-	
   position: absolute;
-  top: 150px;
-  left: 140px;
-  width: 460px;
-	height: 460px;
+  top: 245px;
+  left: 146px;
+  width: 388px;
+	height: 388px;
   text-align: center;
   color: #666;
   z-index: 1;
@@ -85,55 +84,22 @@ header p{
   top: 5px;
 }
 
-}
 
 #headerImg{
-  margin: 0 auto;
+  margin: 10px;
+  width: 60%;
+  height: auto;
+  padding-bottom: 10px;
 }
 
-.center {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 50%;
-}
-
-@media (max-width: 590px) {
-  button{
-    width: 80%;
-    margin-top: 5px;
-  }
-}
-
-#sizeSettings {
-	margin: 10px;
-	background-color: #4a74a8;
-	width: 20%;
-}
-
-#sizeSettings label{
-	margin-left: 4px;
-	color:white;
-}
-
-
-#chart {	
+#chart{
 	position: relative;
-    height: 750px;
-    width: 1500px;
-    margin: 0px 0 0 -220px;
-    top: 50%;
-    left: 40%;
+  width: 680px;
 }
 
 #chart path {
-  stroke: #fff;
+  stroke: #000;
 }
-
-
-
-
-
 
 path.line {
   fill: none;
@@ -168,4 +134,38 @@ path.area {
 .guideline {
   margin-right: 100px;
   float: right;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-gap: 10px;
+  background-color: #4A74A8;
+  margin-bottom: 10px;
+  padding-bottom: 20px;
+  padding-left: 10px;
+}
+.grid-container > div {
+  background-color: #4A74A8;
+  text-align: center;
+}
+
+#legend{
+  padding: 10px 0 0 10px;
+  display: inline-block;
+  font-size: 14px;
+  color: white;
+}
+#headerDescription{
+  padding-top: 20px;
+  color: white;
+  font-size: 20px;
+}
+
+#explanation {
+
+}
+
+#percentage {
+  font-size: 2.5em;
 }

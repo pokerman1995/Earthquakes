@@ -163,9 +163,6 @@ Earthquakes.ChangeDataControl = function(opt_options) {
 
 
 
-
-
-
   var map = new ol.Map({
     controls: ol.control.defaults({
       attributionOptions: {
@@ -175,20 +172,23 @@ Earthquakes.ChangeDataControl = function(opt_options) {
 	  /*.extend([
       new Earthquakes.ChangeDataControl()
     ]),*/
-	  
+
     layers: [raster, regions, vector],
     target: 'map',
     view: new ol.View({
       center: ol.proj.fromLonLat([-97, 38]),
-      zoom: 3.4
+      zoom: 3.0
     })
   });
+
+map.getView().setMinZoom(3.0);
 
 map.once('postcompose', function(event){
 	setTimeout(function(){
 		console.log("Waiting");
 		drawTimeline();
 	}, 2000);
+  drawLegend();
 });
 
   blur.addEventListener('input', function() {
@@ -261,7 +261,7 @@ var diagram = document.createElement('svg');
   }
 
 var showEarthquakesPerYear = function(region){
-	
+
 	var earthquakes_per_year = earthquakes_per_region[region];
     var margin = {top: 10, right: 10, bottom: 40, left: 30},
         width = 480 - margin.left - margin.right,
@@ -358,14 +358,7 @@ var popup = new ol.Overlay({
 });
 
 
-
-
-
-
-
-
-
-var width = document.getElementById("chart").offsetWidth/2;
+var width = document.getElementById("chart").offsetWidth;
 var height = width;
 var radius = Math.min(width, height) / 2;
 
@@ -376,14 +369,14 @@ var b = {
 
 // Mapping of step names to colors.
 var colors = {
-  "In general, how worried are you about earthquakes?": "#5687d1",
-  "How worried are you about the Big One, a massive, catastrophic earthquake?": "#7b615c",
-  "Do you think the \"Big One\" will occur in your lifetime?": "#de783b",
-  "Have you ever experienced an earthquake?": "#6ab975",
-  "Have you or anyone in your household taken any precautions for an earthquake (packed an earthquake survival kit, prepared an evacuation plan, etc.)?": "#a173d1",
-  "How familiar are you with the San Andreas Fault line?": "#bbbbbb",
-  "How familiar are you with the Yellowstone Supervolcano?": "#c3da23",
-	
+  "In general, how worried are you about earthquakes?": "#A3BFE1",
+  "How worried are you about the Big One, a massive, catastrophic earthquake?": "#315F96",
+  "Do you think the \"Big One\" will occur in your lifetime?": "#8279CC",
+  "Have you ever experienced an earthquake?": "#428A9E",
+  "Have you or anyone in your household taken any precautions for an earthquake (packed an earthquake survival kit, prepared an evacuation plan, etc.)?": "#2D5965",
+  "How familiar are you with the San Andreas Fault line?": "#B2B8D3",
+  "How familiar are you with the Yellowstone Supervolcano?": "#4CBF6F",
+
   "Not at all worried": "#158d2a",
   "Not at all familiar": "#158d2a",
 
@@ -398,18 +391,18 @@ var colors = {
 
   "Extremely worried": "#5d4d0b",
   "Extremely familiar": "#5d4d0b",
-	
+
   "No": "#163aae",
   "Yes": "#e9a45f",
-	
+
   "Yes, one or more minor ones": "#d5a0f8",
   "Yes, one or more major ones": "#b9fb6f",
-	
-  "No answer": "#5cfbe4"	
+
+  "No answer": "#5cfbe4"
 };
 
 // Total size of all segments; we set this later, after loading the data.
-var totalSize = 0; 
+var totalSize = 0;
 
 var vis = d3.select("#chart").append("svg:svg")
     .attr("width", width)
@@ -444,13 +437,13 @@ function createVisualization(json){
   var root = d3.hierarchy(json)
       .sum(function(d) { return d.size; })
       .sort(function(a, b) { return b.value - a.value; });
-	
+
 	  // For efficiency, filter nodes to keep only those large enough to see.
   var nodes = partition(root).descendants()
       .filter(function(d) {
           return (d.x1 - d.x0 > 0.005); // 0.005 radians = 0.29 degrees
       });
-  
+
   var path = vis.data([json]).selectAll("path")
       .data(nodes)
       .enter().append("svg:path")
@@ -470,11 +463,11 @@ function createVisualization(json){
 
 // Fade all but the current sequence, and show it in the breadcrumb trail.
 function mouseover(d) {
-	
+
   var features = regions.getSource().getFeatures();
   var regionData = d.data.regions;
 
-  
+
   if(regionData !== undefined){
 	 var maxValue = d3.max(regionData, function(d){
 	 return d.number;
@@ -489,12 +482,16 @@ function mouseover(d) {
 		 style.setFill(fill);
 		 features[i].setStyle(style);
 
-		 
-	 } 
+     d3.select(this).style("cursor", "pointer");
+	 }
 	 //regions.getSource().clear();
 	  //regions.getSource().addFeatures(features);
   }
-	
+
+  d3.select("#answer-text")
+      .style("visibility", "");
+
+  console.log(d);
 
   var sequenceArray = d.ancestors().reverse();
   sequenceArray.shift(); // remove root node from the array
@@ -509,6 +506,7 @@ function mouseover(d) {
                 return (sequenceArray.indexOf(node) >= 0);
               })
       .style("opacity", 1);
+
 }
 
 // Restore everything to full opacity when moving off the visualization.
@@ -530,7 +528,7 @@ function mouseleave(d) {
               d3.select(this).on("mouseover", mouseover);
             });
 
-  d3.select("#explanation")
+  d3.select("#answer-text")
       .style("visibility", "hidden");
 }
 
@@ -552,7 +550,7 @@ function getStyle(value, maxValue){
 			   color="rgba(179,0,0,0.5)";
 
 	}
-	 
+
      return new ol.style.Fill({
        color:color
    });
@@ -567,9 +565,9 @@ function getStyle(value, maxValue){
 function drawTimeline(){
 	d3.select("#timelineChart").remove();
 	var margin = {top: 10, right: 80, bottom: 80, left: 80},
-    width = document.getElementById("chart").offsetWidth-margin.left -margin.top,
-	height = 400-margin.right -margin.bottom;
-	
+    width = document.getElementById("chart").offsetWidth-margin.left -margin.top+400,
+	height = 420-margin.right -margin.bottom;
+
 	for(var region in earthquakes_per_region){
 		if(earthquakes_per_region.hasOwnProperty(region)){
 			var years = [];
@@ -581,9 +579,6 @@ function drawTimeline(){
 		}
 	}
 
-	
-	
-	
 // Scales and axes. Note the inverted domain for the y-scale: bigger is up!
 var x = d3.scaleBand().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
@@ -602,7 +597,7 @@ var line = d3.line()
     .curve(d3.curveMonotoneX)
     .x(function(d) { return x(d.year); })
     .y(function(d) { return y(d.n); });
-	
+
 	  // Compute the minimum and maximum date, and the maximum price.
 	var minYear = d3.min(earthquakes, function(d){
 	  return d3.min(d, function(e){
@@ -614,8 +609,8 @@ var line = d3.line()
   y.domain([0, d3.max(earthquakes, function(d) {
 	  return d3.max(d, function(e){
 		  return e.n; })})]).nice();
-	
-	
+
+
 	  var svg = d3.select("#timeline").append("svg:svg")
 	  .attr("id", "timelineChart")
       .attr("width", width + margin.left + margin.right)
@@ -635,9 +630,12 @@ var line = d3.line()
       .attr("class", "x axis")
       .attr("transform", "translate(-25," + height + ")")
       .call(xAxis);
-	
+
 	var a = d3.selectAll('.x.axis .tick')
-    .on('click',showFilteredYears);
+    .on('click',showFilteredYears)
+    .on('mouseover', function(d){
+        d3.select(this).style("cursor", "pointer");
+      });
 	console.log(a);
 
   // Add the y-axis.
@@ -645,10 +643,10 @@ var line = d3.line()
       .attr("class", "y axis")
       .attr("transform", "translate(" + width-25 + ",0)")
       .call(yAxis);
-	
+
 	console.log(filteredEarthquakes);
 	if(filteredEarthquakes.length != 0){
-		
+
 	  var colors = d3.scaleOrdinal(d3.schemeCategory10);
   svg.selectAll('.line')
     .data(filteredEarthquakes)
@@ -662,7 +660,7 @@ var line = d3.line()
         .attr('d', function(d) {
           return line(d);
         })
-	
+
 	  /* Add 'curtain' rectangle to hide entire graph */
   var curtain = svg.append('rect')
     .attr('x', -1 * width)
@@ -672,8 +670,7 @@ var line = d3.line()
     .attr('class', 'curtain')
     .attr('transform', 'rotate(180)')
     .style('fill', '#ffffff');
-    
-    
+
   /* Create a shared transition for anything we're animating */
   var t = svg.transition()
     .delay(250)
@@ -685,21 +682,19 @@ var line = d3.line()
         .style('opacity', 0)
         .remove()
     });
-  
+
   t.select('rect.curtain')
     .attr('width', 0);
   t.select('line.guide')
     .attr('transform', 'translate(' + width + ', 0)')
-		
+
 	}
-	
-
-
 }
+
 
 function showFilteredYears(selectedYear){
 	console.log(selectedYear);
-		
+
 filteredEarthquakes = [];
 earthquakes.forEach(function(d){
   filteredEarthquakes.push(d.filter(function (object) {
@@ -707,12 +702,60 @@ earthquakes.forEach(function(d){
     return year <= selectedYear;
   }));
 });
-	
-drawTimeline();
-	
-
-
+  drawTimeline();
 }
 
 
 
+
+
+
+function drawLegend(){
+
+// Dimensions of legend item: width, height, spacing, radius of rounded rect.
+var li = {
+  w: 550, h: 25, s: 3, r: 3
+};
+
+var questions = {
+  "In general, how worried are you about earthquakes?": "#A3BFE1",
+  "How worried are you about the Big One, a massive, catastrophic earthquake?": "#315F96",
+  "Do you think the \"Big One\" will occur in your lifetime?": "#8279CC",
+  "Have you ever experienced an earthquake?": "#428A9E",
+  "Have you or anyone in your household taken any precautions for an earthquake?": "#2D5965",
+  "How familiar are you with the San Andreas Fault line?": "#B2B8D3",
+  "How familiar are you with the Yellowstone Supervolcano?": "#4CBF6F"
+};
+
+var questionColors = {};
+for (var i = 0; i < 7; i++) {
+  var question = Object.keys(questions)[i];
+  var color = questions[question];
+  questionColors[question] = color;
+}
+
+var legend = d3.select("#legend").append("svg:svg")
+    .attr("width", li.w)
+    .attr("height", d3.keys(questionColors).length * (li.h + li.s));
+
+var g = legend.selectAll("g")
+    .data(d3.entries(questionColors))
+    .enter().append("svg:g")
+    .attr("transform", function(d, i) {
+            return "translate(0," + i * (li.h + li.s) + ")";
+         })
+
+g.append("svg:rect")
+    .attr("rx", li.r)
+    .attr("ry", li.r)
+    .attr("width", li.w)
+    .attr("height", li.h)
+    .style("fill", function(d) { return d.value; });
+
+g.append("svg:text")
+    .attr("x", li.w / 2)
+    .attr("y", li.h / 2)
+    .attr("dy", "0.35em")
+    .attr("text-anchor", "middle")
+    .text(function(d) { return d.key; });
+}
