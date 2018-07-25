@@ -154,9 +154,18 @@ path.area {
   padding: 10px 0 0 10px;
   display: inline-block;
   font-size: 14px;
+  color: white;
 }
 #headerDescription{
   padding-top: 20px;
   color: white;
   font-size: 20px;
+}
+
+#explanation {
+
+}
+
+#percentage {
+  font-size: 2.5em;
 }
