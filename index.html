@@ -19,14 +19,15 @@
         <p>Visualization of earthquake occurrences in the USA and comparison of the fears of the American population.</p>
       </div>
     </header>
-	<div id="chart">
-    <div id="map" class="map" >
-		<div id="info">
-		</div>
-      		<div id="popup" title="Earthquakes per year">
-    		</div>
-	  	</div>
-	</div>
+  <div id="mainView">
+  	<div id="chart">
+      <div id="map" class="map">
+		      <div id="info"></div>
+      		<div id="popup" title="Earthquakes per year"></div>
+	    </div>
+	  </div>
+  </div>
+
 	<div id="timeline"></div>
 
     <form id="sizeSettings">
@@ -34,7 +35,7 @@
       <input id="radius" type="range" min="1" max="50" step="1" value="1"/>
       <label>SET BLUR SIZE:</label>
       <input id="blur" type="range" min="1" max="50" step="1" value="0"/>
-    </form> 
+    </form>
    <script scr="EventPublisher.js"></script>
    <script src="MapView.js"></script>
    <script src="EarthquakeDataProcesser.js"></script>
