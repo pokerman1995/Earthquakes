@@ -104,6 +104,8 @@ function buildHierarchy(csv){
 			var answer = csv[i][j];
 			// Get region.
 			var region = csv[i][10];
+			// Get age.
+			var age = csv[i][7]
 			if(region === "" || region === undefined){
 				continue;
 			}
@@ -115,7 +117,7 @@ function buildHierarchy(csv){
 				return obj.name === answer;
 			})
 			if(questionChild === undefined){
-				questionChild = {"name": answer, "size": 0, "regions": []};
+				questionChild = {"name": answer, "size": 0, "regions": [], ageDistribution: []};
 				questionChildren.push(questionChild);
 			}
 			questionChild["size"] += 1;
@@ -124,15 +126,24 @@ function buildHierarchy(csv){
 			var answerRegions = questionChild["regions"];
 			var answerRegion = answerRegions.find(obj => {
 				return obj.name === region;
-			})
+			});
 			if(answerRegion === undefined){
 				answerRegion = {"name": region, "number": 0};
 				answerRegions.push(answerRegion);
 			}
 			answerRegion["number"] += 1;
+			
+			var ageDistribution = questionChild["ageDistribution"];
+			var ageInterval = ageDistribution.find(obj => {
+				return obj.age === age;
+			});
+			if(ageInterval === undefined){
+				ageInterval = {"age": age, "number": 0};
+				ageDistribution.push(ageInterval);
+			}
+			ageInterval["number"] += 1;
 		}
 	}
-	console.log(root);
 	return root;
 }
   that.buildHierarchy = buildHierarchy;

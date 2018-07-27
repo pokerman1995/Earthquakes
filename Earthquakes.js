@@ -413,7 +413,6 @@ var arc = d3.arc()
     .endAngle(function(d) { return d.x1; })
     .innerRadius(function(d) { return Math.sqrt(d.y0); })
     .outerRadius(function(d) { return Math.sqrt(d.y1); });
-console.log(arc);
 var json;
 d3.text("data/earthquake_data.csv", function(text) {
   var csv = d3.csvParseRows(text);
@@ -486,22 +485,23 @@ function mouseover(d) {
   d3.select("#answer-text")
       .style("visibility", "");
 
-  console.log(d);
-
-  var sequenceArray = d.ancestors().reverse();
-  sequenceArray.shift(); // remove root node from the array
+var sequenceArray = d.ancestors().reverse();
+  sequenceArray.shift();
+  //var sequenceArray = d.ancestors().reverse();
+  //sequenceArray.shift(); // remove root node from the array
 
   // Fade all the segments.
-  d3.selectAll("path")
+  d3.select("#chart").selectAll("path")
       .style("opacity", 0.3);
 
-  // Then highlight only those that are an ancestor of the current segment.
+   //Then highlight only those that are an ancestor of the current segment.
   vis.selectAll("path")
       .filter(function(node) {
                 return (sequenceArray.indexOf(node) >= 0);
               })
       .style("opacity", 1);
-
+	
+	updatePieChart(d);
 }
 
 // Restore everything to full opacity when moving off the visualization.
@@ -512,10 +512,10 @@ function mouseleave(d) {
       .style("visibility", "hidden");
 
   // Deactivate all segments during transition.
-  d3.selectAll("path").on("mouseover", null);
+  d3.select("#chart").selectAll("path").on("mouseover", null);
 
   // Transition each segment to full opacity and then reactivate it.
-  d3.selectAll("path")
+  d3.select("#chart").selectAll("path")
       .transition()
       .duration(1000)
       .style("opacity", 1)
@@ -558,7 +558,7 @@ function getStyle(value, maxValue){
 
 
 function drawTimeline(){
-	d3.select("#timelineChart").remove();
+	d3.select("#timeline").select("svg").remove();
 	var margin = {top: 10, right: 80, bottom: 80, left: 80},
     width = document.getElementById("chart").offsetWidth-margin.left -margin.top+400,
 	height = 420-margin.right -margin.bottom;
@@ -705,7 +705,6 @@ drawTimeline();
 	});
 	filteredFeatures.forEach(function(d){
 		setTimeout(function(){
-			console.log("timeout");
 					d.setStyle(getStyleEarthquakes(d));
 		flash(d);
 		}, 500);
@@ -836,3 +835,240 @@ g.append("svg:text")
     .attr("text-anchor", "middle")
     .text(function(d) { return d.key; });
 }
+
+
+
+
+function drawPieChart(d){
+	
+var ageDistribution = d.data["ageDistribution"];
+	var size = d.data["size"];
+	console.log(size);
+	for(var i in ageDistribution){
+		var age = ageDistribution[i];
+		age["percentage"] = "" + Math.round(age["number"]/size *100) + "%";
+
+	}
+	var text = "";
+
+var width = 200;
+var height = 200;
+var thickness = 40;
+var duration = 750;
+var padding = 10;
+var opacity = .8;
+var opacityHover = 1;
+var otherOpacityOnHover = .8;
+var tooltipMargin = 13;
+
+var radius = Math.min(width-padding, height-padding) / 2;
+var color = d3.scaleOrdinal(["#ff0000","#1fe223","#f7f30e","#f70ea2"]);
+
+var svg = d3.select("#piechart")
+.append('svg')
+.attr('class', 'pie')
+.attr('width', width)
+.attr('height', height);
+
+var g = svg.append('g')
+.attr("class", "slices")
+.attr('transform', 'translate(' + (width/2) + ',' + (height/2) + ')');
+
+var arc = d3.arc()
+.innerRadius(0)
+.outerRadius(radius);
+
+var pie = d3.pie()
+.value(function(d) { return d.number; })
+.sort(null);
+
+var path = g.selectAll('path')
+  .data(pie(ageDistribution))
+  .enter()
+  .append("g")  
+  .append('path')
+  .attr('d', arc)
+  .attr('fill', (d,i) => color(i))
+  .style('opacity', opacity)
+  .style('stroke', 'white')
+  .each(function(d){this._current = d;})
+.on("mouseover", function(d) {
+      d3.select("#piechart").selectAll('path')
+        .style("opacity", otherOpacityOnHover);
+      d3.select(this) 
+        .style("opacity", opacityHover);
+
+      var g = d3.select("#piechart").select("svg")
+        .style("cursor", "pointer")
+        .append("g")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+		
+ 
+      g.append("text")
+        .attr("class", "name-text")
+        .text(`${d.data.age} (${d.data.percentage})`)
+        .attr('text-anchor', 'middle');
+    
+      var text = g.select("text");
+      var bbox = text.node().getBBox();
+      var padding = 2;
+      g.insert("rect", "text")
+        .attr("x", bbox.x - padding)
+        .attr("y", bbox.y - padding)
+        .attr("width", bbox.width + (padding*2))
+        .attr("height", bbox.height + (padding*2))
+        .style("fill", "white")
+        .style("opacity", 0.75);
+    })
+  .on("mousemove", function(d) {
+        var mousePosition = d3.mouse(this);
+        var x = mousePosition[0] + width/2;
+        var y = mousePosition[1] + height/2 - tooltipMargin;
+    
+        var text = d3.select("#piechart").select('.tooltip text');
+        var bbox = text.node().getBBox();
+        if(x - bbox.width/2 < 0) {
+          x = bbox.width/2;
+        }
+        else if(width - x - bbox.width/2 < 0) {
+          x = width - bbox.width/2;
+        }
+    
+        if(y - bbox.height/2 < 0) {
+          y = bbox.height + tooltipMargin * 2;
+        }
+        else if(height - y - bbox.height/2 < 0) {
+          y = height - bbox.height/2;
+        }
+    
+        d3.select("#piechart").select('.tooltip')
+          .style("opacity", 1)
+          .attr('transform',`translate(${x}, ${y})`);
+    })
+  .on("mouseout", function(d) {   
+      d3.select("#piechart").select("svg")
+        .style("cursor", "none")  
+        .select(".tooltip").remove();
+    d3.select("#piechart").selectAll('path')
+        .style("opacity", opacity);
+    })
+  .on("touchstart", function(d) {
+      d3.select("#piechart").select("svg")
+        .style("cursor", "none");    
+  })
+  .each(function(d, i) { this._current = i; });
+
+var legend = d3.select("#piechart").append('div')
+			.attr('class', 'legend')
+			.style('margin-top', '30px');
+
+var keys = legend.selectAll('.key')
+			.data(ageDistribution)
+			.enter().append('div')
+			.attr('class', 'key')
+			.style('display', 'flex')
+			.style('align-items', 'center')
+			.style('margin-right', '20px');
+
+		keys.append('div')
+			.attr('class', 'symbol')
+			.style('height', '10px')
+			.style('width', '10px')
+			.style('margin', '5px 5px')
+			.style('background-color', (d, i) => color(i));
+
+		keys.append('div')
+			.attr('class', 'name')
+			.text(d => `${d.age} (${d.percentage})`);
+
+		keys.exit().remove();
+
+}
+
+
+function updatePieChart(d) {
+		if(d3.select("#piechart").select("svg").empty()){
+		console.log("empty");
+		drawPieChart(d);
+		return;
+	}
+	
+	
+	var ageDistribution = d.data["ageDistribution"];
+	var size = d.data["size"];
+	console.log(size);
+	for(var i in ageDistribution){
+		var age = ageDistribution[i];
+		age["percentage"] = "" + Math.round(age["number"]/size *100) + "%";
+
+	}
+
+	
+	
+	
+	var pie = d3.pie()
+		.value(function(d) { return d.number; })(ageDistribution);
+	path = d3.select("#piechart").selectAll("path").data(pie);
+	//path.attr("d", arc);
+	path.transition().duration(500).attrTween("d", arcTween); // Smooth transition with arcTween
+	//d3.selectAll("text").data(pie).attr("transform", function(d) { return "translate(" + labelArc.centroid(d) + ")"; });
+	
+	d3.select("#piechart").select(".legend").remove();
+	var legend = d3.select("#piechart").append('div')
+			.attr('class', 'legend')
+			.style('margin-top', '30px');
+
+	
+var color = d3.scaleOrdinal(["#ff0000","#1fe223","#f7f30e","#f70ea2"]);
+
+var keys = legend.selectAll('.key')
+			.data(ageDistribution)
+			.enter().append('div')
+			.attr('class', 'key')
+			.style('display', 'flex')
+			.style('align-items', 'center')
+			.style('margin-right', '20px');
+
+		keys.append('div')
+			.attr('class', 'symbol')
+			.style('height', '10px')
+			.style('width', '10px')
+			.style('margin', '5px 5px')
+			.style('background-color', (d, i) => color(i));
+
+		keys.append('div')
+			.attr('class', 'name')
+			.text(d => `${d.age} (${d.percentage})`);
+
+		keys.exit().remove();
+
+
+};
+
+function arcTween(a) {
+	
+	var width = 200;
+var height = 200;
+var thickness = 40;
+var duration = 750;
+var padding = 10;
+var opacity = .8;
+var opacityHover = 1;
+var otherOpacityOnHover = .8;
+var tooltipMargin = 13;
+
+var radius = Math.min(width-padding, height-padding) / 2;
+	
+var arc = d3.arc()
+.innerRadius(0)
+.outerRadius(radius);
+  var i = d3.interpolate(this._current, a);
+  this._current = i(0);
+  return function(t) {
+    return arc(i(t));
+  };
+}
+
+
+
