@@ -1,4 +1,4 @@
-header{
+body{
   background-color: #4A74A8;
 }
 
@@ -99,7 +99,7 @@ header p{
 }
 
 #chart path {
-  stroke: #000;
+  stroke: white;
 }
 
 path.line {
@@ -117,7 +117,7 @@ path.area {
 }
 
 .x.axis line {
-  stroke: #fff;
+  stroke: white;
 }
 
 .x.axis .minor {
@@ -130,7 +130,13 @@ path.area {
 
 .y.axis line, .y.axis path {
   fill: none;
-  stroke: #000;
+  stroke: white;
+}
+
+.tick{
+  fill: white;
+  stroke: white;
+  font-size: 1em;
 }
 .guideline {
   margin-right: 100px;
@@ -142,7 +148,6 @@ path.area {
   grid-template-columns: auto auto;
   grid-gap: 10px;
   background-color: #4A74A8;
-  margin-bottom: 10px;
   padding-bottom: 20px;
   padding-left: 10px;
 }
@@ -178,7 +183,7 @@ path.area {
   padding-right: 20px;
 }
 
-.legend {
+#piechart .legend {
 	float: right;
   padding-right: 200px;
   font-family: "Verdana";
@@ -196,4 +201,19 @@ path.area {
 
 .pie .value-text{
   font-size: 3em;
+}
+
+#timeline{
+  padding-top: 30px;
+}
+
+#timelineChart{
+  float: left;
+}
+
+#timeline .legend{
+  float: right;
+  margin-right: 60px;
+  font-size: 1em;
+  color: white;
 }

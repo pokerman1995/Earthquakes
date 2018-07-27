@@ -592,7 +592,7 @@ var x = d3.scaleBand().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
     xAxis = d3.axisBottom(x).tickSize(1),
     yAxis = d3.axisLeft(y).tickArguments(4);
-	
+
 	var color = d3.scaleOrdinal(d3.schemeCategory10);
 
 // An area generator, for the light fill.
@@ -654,8 +654,8 @@ var line = d3.line()
       .attr("class", "y axis")
       .attr("transform", "translate(" + width-25 + ",0)")
       .call(yAxis);
-	
-	
+
+
 
 	if(filteredEarthquakes.length != 0){
 		console.log(filteredEarthquakes);
@@ -681,7 +681,7 @@ var line = d3.line()
     .attr('width', width)
     .attr('class', 'curtain')
     .attr('transform', 'rotate(180)')
-    .style('fill', '#ffffff');
+    .style('fill', '#4A74A8');
 
   /* Create a shared transition for anything we're animating */
   var t = svg.transition()
@@ -699,7 +699,7 @@ var line = d3.line()
     .attr('width', 0);
   t.select('line.guide')
     .attr('transform', 'translate(' + width + ', 0)')
-		
+
 		var legend = d3.select("#timeline").append('div')
 			.attr('class', 'legend')
 			.style('margin-top', '30px');
@@ -724,8 +724,8 @@ var keys = legend.selectAll('.key')
 			.text(d => `${d[0].name}`);
 
 		keys.exit().remove();
-		
-		
+
+
 
 	}
 }
