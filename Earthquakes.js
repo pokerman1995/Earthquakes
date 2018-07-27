@@ -371,14 +371,14 @@ var colors = {
   "How familiar are you with the San Andreas Fault line?": "#B2B8D3",
   "How familiar are you with the Yellowstone Supervolcano?": "#4CBF6F",
 
-  "Not at all worried": "#158d2a",
-  "Not at all familiar": "#158d2a",
+  "Not at all worried": "#004D0D",
+  "Not at all familiar": "#004D0D",
 
-  "Somewhat worried": "#fa8876",
-  "Somewhat familiar": "#fa8876",
+  "Somewhat worried": "#158999",
+  "Somewhat familiar": "#158999",
 
-  "Not so worried": "#f41dcf",
-  "Not so familiar": "#f41dcf",
+  "Not so worried": "#8D2EF3",
+  "Not so familiar": "#8D2EF3",
 
   "Very worried": "#63805d",
   "Very familiar": "#63805d",
@@ -387,10 +387,10 @@ var colors = {
   "Extremely familiar": "#5d4d0b",
 
   "No": "#163aae",
-  "Yes": "#e9a45f",
+  "Yes": "#FFCB57",
 
   "Yes, one or more minor ones": "#d5a0f8",
-  "Yes, one or more major ones": "#b9fb6f",
+  "Yes, one or more major ones": "#BE5E9A",
 
   "No answer": "#5cfbe4"
 };
@@ -695,9 +695,9 @@ earthquakes.forEach(function(d){
     return year <= selectedYear;
   }));
 });
-	
+
 drawTimeline();
-	
+
 	var features = vector.getSource().getFeatures();
 	var filteredFeatures = features.filter(function(d){
 		d.setStyle(new ol.style.Style({}));
@@ -723,7 +723,7 @@ var getStyleEarthquakes = function(feature){
 			stroke: new ol.style.Stroke({color: "#000000", width: 1})
 
 		})
-		
+
 	});
 }
 
