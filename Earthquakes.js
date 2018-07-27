@@ -483,8 +483,16 @@ function mouseover(d) {
 	  //regions.getSource().addFeatures(features);
   }
 
+
+  var answer = d.data.name;
+  var answerString = answer;
+
+  d3.select("#answer")
+      .text(answerString);
+
   d3.select("#answer-text")
       .style("visibility", "");
+
 
   console.log(d);
 
