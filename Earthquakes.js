@@ -614,10 +614,24 @@ var line = d3.line()
 		  return e.n; })})]).nice();
 
 
+  var zoom = d3.zoom()
+      .scaleExtent([1, 5])
+      .extent([100, 100], [width-100, height-100])
+      .on("zoom", zoomed);
+
+  function zoomed() {
+      svg.selectAll("#timeline")
+          .attr("transform", d3.event.transform);
+      d3.selectAll('.line').style("stroke-width", 2/d3.event.transform.k);
+      gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
+      gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
+  }
+
 	  var svg = d3.select("#timeline").append("svg:svg")
 	  .attr("id", "timelineChart")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
+      .call(zoom)
     .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
@@ -629,7 +643,7 @@ var line = d3.line()
       .attr("height", height);
 
   // Add the x-axis.
-  svg.append("g")
+  var gX = svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(-25," + height + ")")
       .call(xAxis);
@@ -642,7 +656,7 @@ var line = d3.line()
 
 
   // Add the y-axis.
-  svg.append("g")
+  var gY = svg.append("g")
       .attr("class", "y axis")
       .attr("transform", "translate(" + width-25 + ",0)")
       .call(yAxis);
