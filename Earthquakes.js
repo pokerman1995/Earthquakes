@@ -371,14 +371,14 @@ var colors = {
   "How familiar are you with the San Andreas Fault line?": "#B2B8D3",
   "How familiar are you with the Yellowstone Supervolcano?": "#4CBF6F",
 
-  "Not at all worried": "#158d2a",
-  "Not at all familiar": "#158d2a",
+  "Not at all worried": "#004D0D",
+  "Not at all familiar": "#004D0D",
 
-  "Somewhat worried": "#fa8876",
-  "Somewhat familiar": "#fa8876",
+  "Somewhat worried": "#158999",
+  "Somewhat familiar": "#158999",
 
-  "Not so worried": "#f41dcf",
-  "Not so familiar": "#f41dcf",
+  "Not so worried": "#8D2EF3",
+  "Not so familiar": "#8D2EF3",
 
   "Very worried": "#63805d",
   "Very familiar": "#63805d",
@@ -387,10 +387,10 @@ var colors = {
   "Extremely familiar": "#5d4d0b",
 
   "No": "#163aae",
-  "Yes": "#e9a45f",
+  "Yes": "#FFCB57",
 
   "Yes, one or more minor ones": "#d5a0f8",
-  "Yes, one or more major ones": "#b9fb6f",
+  "Yes, one or more major ones": "#BE5E9A",
 
   "No answer": "#5cfbe4"
 };
@@ -482,6 +482,13 @@ function mouseover(d) {
 	  //regions.getSource().addFeatures(features);
   }
 
+
+  var answer = d.data.name;
+  var answerString = answer;
+
+  d3.select("#answer")
+      .text(answerString);
+
   d3.select("#answer-text")
       .style("visibility", "");
 
@@ -489,6 +496,7 @@ var sequenceArray = d.ancestors().reverse();
   sequenceArray.shift();
   //var sequenceArray = d.ancestors().reverse();
   //sequenceArray.shift(); // remove root node from the array
+
 
   // Fade all the segments.
   d3.select("#chart").selectAll("path")
@@ -606,10 +614,24 @@ var line = d3.line()
 		  return e.n; })})]).nice();
 
 
+  var zoom = d3.zoom()
+      .scaleExtent([1, 5])
+      .extent([100, 100], [width-100, height-100])
+      .on("zoom", zoomed);
+
+  function zoomed() {
+      svg.selectAll("#timeline")
+          .attr("transform", d3.event.transform);
+      d3.selectAll('.line').style("stroke-width", 2/d3.event.transform.k);
+      gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
+      gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
+  }
+
 	  var svg = d3.select("#timeline").append("svg:svg")
 	  .attr("id", "timelineChart")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
+      .call(zoom)
     .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
@@ -621,7 +643,7 @@ var line = d3.line()
       .attr("height", height);
 
   // Add the x-axis.
-  svg.append("g")
+  var gX = svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(-25," + height + ")")
       .call(xAxis);
@@ -634,7 +656,7 @@ var line = d3.line()
 
 
   // Add the y-axis.
-  svg.append("g")
+  var gY = svg.append("g")
       .attr("class", "y axis")
       .attr("transform", "translate(" + width-25 + ",0)")
       .call(yAxis);
@@ -695,9 +717,9 @@ earthquakes.forEach(function(d){
     return year <= selectedYear;
   }));
 });
-	
+
 drawTimeline();
-	
+
 	var features = vector.getSource().getFeatures();
 	var filteredFeatures = features.filter(function(d){
 		d.setStyle(new ol.style.Style({}));
@@ -722,7 +744,7 @@ var getStyleEarthquakes = function(feature){
 			stroke: new ol.style.Stroke({color: "#000000", width: 1})
 
 		})
-		
+
 	});
 }
 
