@@ -460,8 +460,10 @@ function mouseover(d) {
 
   var features = regions.getSource().getFeatures();
   var regionData = d.data.regions;
+		console.log(regionData);
 
 
+	console.log(d);
   if(regionData !== undefined){
 	 var maxValue = d3.max(regionData, function(d){
 	 return d.number;
@@ -471,6 +473,11 @@ function mouseover(d) {
 		 var currentRegion = regionData.find(obj => {
 			 return obj.name === featureName;
 		 })
+
+		 if(currentRegion === undefined){
+			 currentRegion = {"name": featureName, "number": 0};
+		 }
+		 console.log(featureName, currentRegion);
 		 var style = features[i].getStyle();
 		 var fill = getStyle(currentRegion["number"], maxValue);
 		 style.setFill(fill);
@@ -1018,8 +1025,11 @@ function updatePieChart(d) {
 	
 	
 	var ageDistribution = d.data["ageDistribution"];
+	if(ageDistribution === undefined){
+		d3.select("#piechart").select("svg").remove();
+		d3.select("#piechart").select(".legend").remove();
+	}
 	var size = d.data["size"];
-	console.log(size);
 	for(var i in ageDistribution){
 		var age = ageDistribution[i];
 		age["percentage"] = "" + Math.round(age["number"]/size *100) + "%";
