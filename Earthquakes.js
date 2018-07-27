@@ -463,7 +463,6 @@ function mouseover(d) {
 		console.log(regionData);
 
 
-	console.log(d);
   if(regionData !== undefined){
 	 var maxValue = d3.max(regionData, function(d){
 	 return d.number;
@@ -477,7 +476,6 @@ function mouseover(d) {
 		 if(currentRegion === undefined){
 			 currentRegion = {"name": featureName, "number": 0};
 		 }
-		 console.log(featureName, currentRegion);
 		 var style = features[i].getStyle();
 		 var fill = getStyle(currentRegion["number"], maxValue);
 		 style.setFill(fill);
@@ -594,6 +592,8 @@ var x = d3.scaleBand().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
     xAxis = d3.axisBottom(x).tickSize(1),
     yAxis = d3.axisLeft(y).tickArguments(4);
+	
+	var color = d3.scaleOrdinal(d3.schemeCategory10);
 
 // An area generator, for the light fill.
 var area = d3.area()
@@ -621,25 +621,12 @@ var line = d3.line()
 		  return e.n; })})]).nice();
 
 
-  var zoom = d3.zoom()
-      .scaleExtent([1, 5])
-      .extent([100, 100], [width-100, height-100])
-      .on("zoom", zoomed);
-
-  function zoomed() {
-      svg.selectAll("#timeline")
-          .attr("transform", d3.event.transform);
-      d3.selectAll('.line').style("stroke-width", 2/d3.event.transform.k);
-      gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
-      gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
-  }
-
 	  var svg = d3.select("#timeline").append("svg:svg")
 	  .attr("id", "timelineChart")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
-      .call(zoom)
     .append("g")
+	  .attr("class", "chart")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
   // Add the clip path.
@@ -667,17 +654,19 @@ var line = d3.line()
       .attr("class", "y axis")
       .attr("transform", "translate(" + width-25 + ",0)")
       .call(yAxis);
+	
+	
 
 	if(filteredEarthquakes.length != 0){
-
+		console.log(filteredEarthquakes);
 	  var colors = d3.scaleOrdinal(d3.schemeCategory10);
   svg.selectAll('.line')
     .data(filteredEarthquakes)
     .enter()
       .append('path')
         .attr('class', 'line')
-        .style('stroke', function(d) {
-          return colors(Math.random() * 50);
+        .style('stroke', function(d, i) {
+          return color(i);
         })
         .attr('clip-path', 'url(#clip)')
         .attr('d', function(d) {
@@ -710,6 +699,33 @@ var line = d3.line()
     .attr('width', 0);
   t.select('line.guide')
     .attr('transform', 'translate(' + width + ', 0)')
+		
+		var legend = d3.select("#timeline").append('div')
+			.attr('class', 'legend')
+			.style('margin-top', '30px');
+
+var keys = legend.selectAll('.key')
+			.data(filteredEarthquakes)
+			.enter().append('div')
+			.attr('class', 'key')
+			.style('display', 'flex')
+			.style('align-items', 'center')
+			.style('margin-right', '20px');
+
+		keys.append('div')
+			.attr('class', 'symbol')
+			.style('height', '10px')
+			.style('width', '10px')
+			.style('margin', '5px 5px')
+			.style('background-color', (d, i) => color(i));
+
+		keys.append('div')
+			.attr('class', 'name')
+			.text(d => `${d[0].name}`);
+
+		keys.exit().remove();
+		
+		
 
 	}
 }
