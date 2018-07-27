@@ -508,7 +508,7 @@ var sequenceArray = d.ancestors().reverse();
                 return (sequenceArray.indexOf(node) >= 0);
               })
       .style("opacity", 1);
-	
+
 	updatePieChart(d);
 }
 
@@ -862,7 +862,7 @@ g.append("svg:text")
 
 
 function drawPieChart(d){
-	
+
 var ageDistribution = d.data["ageDistribution"];
 	var size = d.data["size"];
 	console.log(size);
@@ -907,7 +907,7 @@ var pie = d3.pie()
 var path = g.selectAll('path')
   .data(pie(ageDistribution))
   .enter()
-  .append("g")  
+  .append("g")
   .append('path')
   .attr('d', arc)
   .attr('fill', (d,i) => color(i))
@@ -917,7 +917,7 @@ var path = g.selectAll('path')
 .on("mouseover", function(d) {
       d3.select("#piechart").selectAll('path')
         .style("opacity", otherOpacityOnHover);
-      d3.select(this) 
+      d3.select(this)
         .style("opacity", opacityHover);
 
       var g = d3.select("#piechart").select("svg")
@@ -925,13 +925,13 @@ var path = g.selectAll('path')
         .append("g")
         .attr("class", "tooltip")
         .style("opacity", 0);
-		
- 
+
+
       g.append("text")
         .attr("class", "name-text")
         .text(`${d.data.age} (${d.data.percentage})`)
         .attr('text-anchor', 'middle');
-    
+
       var text = g.select("text");
       var bbox = text.node().getBBox();
       var padding = 2;
@@ -947,7 +947,7 @@ var path = g.selectAll('path')
         var mousePosition = d3.mouse(this);
         var x = mousePosition[0] + width/2;
         var y = mousePosition[1] + height/2 - tooltipMargin;
-    
+
         var text = d3.select("#piechart").select('.tooltip text');
         var bbox = text.node().getBBox();
         if(x - bbox.width/2 < 0) {
@@ -956,28 +956,28 @@ var path = g.selectAll('path')
         else if(width - x - bbox.width/2 < 0) {
           x = width - bbox.width/2;
         }
-    
+
         if(y - bbox.height/2 < 0) {
           y = bbox.height + tooltipMargin * 2;
         }
         else if(height - y - bbox.height/2 < 0) {
           y = height - bbox.height/2;
         }
-    
+
         d3.select("#piechart").select('.tooltip')
           .style("opacity", 1)
           .attr('transform',`translate(${x}, ${y})`);
     })
-  .on("mouseout", function(d) {   
+  .on("mouseout", function(d) {
       d3.select("#piechart").select("svg")
-        .style("cursor", "none")  
+        .style("cursor", "none")
         .select(".tooltip").remove();
     d3.select("#piechart").selectAll('path')
         .style("opacity", opacity);
     })
   .on("touchstart", function(d) {
       d3.select("#piechart").select("svg")
-        .style("cursor", "none");    
+        .style("cursor", "none");
   })
   .each(function(d, i) { this._current = i; });
 
@@ -1015,8 +1015,8 @@ function updatePieChart(d) {
 		drawPieChart(d);
 		return;
 	}
-	
-	
+
+
 	var ageDistribution = d.data["ageDistribution"];
 	var size = d.data["size"];
 	console.log(size);
@@ -1026,22 +1026,22 @@ function updatePieChart(d) {
 
 	}
 
-	
-	
-	
+
+
+
 	var pie = d3.pie()
 		.value(function(d) { return d.number; })(ageDistribution);
 	path = d3.select("#piechart").selectAll("path").data(pie);
 	//path.attr("d", arc);
 	path.transition().duration(500).attrTween("d", arcTween); // Smooth transition with arcTween
 	//d3.selectAll("text").data(pie).attr("transform", function(d) { return "translate(" + labelArc.centroid(d) + ")"; });
-	
+
 	d3.select("#piechart").select(".legend").remove();
 	var legend = d3.select("#piechart").append('div')
 			.attr('class', 'legend')
 			.style('margin-top', '30px');
 
-	
+
 var color = d3.scaleOrdinal(["#ff0000","#1fe223","#f7f30e","#f70ea2"]);
 
 var keys = legend.selectAll('.key')
@@ -1069,8 +1069,8 @@ var keys = legend.selectAll('.key')
 };
 
 function arcTween(a) {
-	
-	var width = 200;
+
+var width = 200;
 var height = 200;
 var thickness = 40;
 var duration = 750;
@@ -1081,7 +1081,7 @@ var otherOpacityOnHover = .8;
 var tooltipMargin = 13;
 
 var radius = Math.min(width-padding, height-padding) / 2;
-	
+
 var arc = d3.arc()
 .innerRadius(0)
 .outerRadius(radius);
@@ -1091,6 +1091,3 @@ var arc = d3.arc()
     return arc(i(t));
   };
 }
-
-
-
