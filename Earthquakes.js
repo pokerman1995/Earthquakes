@@ -84,32 +84,22 @@ var regions = new ol.layer.Vector({
   });
 
 
-var getColor = function(value){
-   var color="rgba(254,240,217,0.5)";;
+var getRegionsStyle = function(){
 
-   var style = new ol.style.Style({
+   return new ol.style.Style({
      fill: new ol.style.Fill({
-       color:color
+       color:"rgba(254,240,217,0.5)"
      }),
 	   stroke: new ol.style.Stroke({
 		   color:'black',
 		   width: 0.5
 	   })
    });
-   return style;
 }
 
 
  regions.getSource().on('addfeature', function(event) {
-    var name = event.feature.get('name');
-    var value;
-    for(var i  = 0; i < parsedData.length; i++){
-      if( parsedData[i].key === name){
-        value = parsedData[i].dataValue;
-      }
-
-    }
-    event.feature.setStyle(getColor(value));
+    event.feature.setStyle(getRegionsStyle())
 
   })
 
@@ -460,7 +450,6 @@ function mouseover(d) {
 
   var features = regions.getSource().getFeatures();
   var regionData = d.data.regions;
-		console.log(regionData);
 
 
   if(regionData !== undefined){
@@ -488,17 +477,30 @@ function mouseover(d) {
   }
 
 
-  var answer = d.data.name;
-  var answerString = answer;
-
-  d3.select("#answer")
-      .text(answerString);
-
-  d3.select("#answer-text")
-      .style("visibility", "");
+	if(d.ancestors()[1].data.name === "root"){
+		d3.select("#question").text(d.data.name);
+		d3.select("#question-text").style("visibility", "");
+		d3.select("#answer-text").style("visibility", "hidden")
+		d3.select("#ages").style("visibility", "hidden")
+	}else{
+		var ancestors = d.ancestors();
+		var totalAnswers = d3.sum(ancestors[1].data.children, function(d){
+			return d.size;
+		})
+		console.log(totalAnswers);
+		d3.select("#question").text(ancestors[1].data.name);
+		d3.select("#question-text").style("visibility", "");
+		d3.select("#answer").text(d.data.name);
+		d3.select("#answer-text").style("visibility", "");
+		d3.select("#percentage").text("" + Math.round(d.data.size/totalAnswers*1000)/10 + "%")
+		d3.select("#ages").style("visibility", "");
+	}
 
 var sequenceArray = d.ancestors().reverse();
+	
+	console.log(d.ancestors());
   sequenceArray.shift();
+	
   //var sequenceArray = d.ancestors().reverse();
   //sequenceArray.shift(); // remove root node from the array
 
@@ -538,6 +540,25 @@ function mouseleave(d) {
 
   d3.select("#answer-text")
       .style("visibility", "hidden");
+	  d3.select("#question-text")
+      .style("visibility", "hidden");
+	  d3.select("#ages")
+      .style("visibility", "hidden");
+	
+		var counter = 0;
+	var sliceCount = d3.select("#piechart").selectAll("path").size();
+
+		d3.select("#piechart").selectAll("path")
+		  .transition().delay(function(d, i) { return i * 150; })
+		.duration(150)
+		.on("end", function(){
+			counter++;
+			if(counter === sliceCount){
+				d3.select("#piechart").select("svg").remove();
+				d3.select("#piechart").select(".legend").remove();
+			}
+		})
+		.remove();
 }
 
 function getStyle(value, maxValue){
@@ -571,11 +592,11 @@ function getStyle(value, maxValue){
 
 
 function drawTimeline(){
-	d3.select("#timeline").select("svg").remove();
+
 	var margin = {top: 10, right: 80, bottom: 80, left: 80},
     width = document.getElementById("chart").offsetWidth-margin.left -margin.top+400,
 	height = 420-margin.right -margin.bottom;
-
+	earthquakes = [];
 	for(var region in earthquakes_per_region){
 		if(earthquakes_per_region.hasOwnProperty(region)){
 			var years = [];
@@ -658,7 +679,6 @@ var line = d3.line()
 
 
 	if(filteredEarthquakes.length != 0){
-		console.log(filteredEarthquakes);
 	  var colors = d3.scaleOrdinal(d3.schemeCategory10);
   svg.selectAll('.line')
     .data(filteredEarthquakes)
@@ -700,6 +720,7 @@ var line = d3.line()
   t.select('line.guide')
     .attr('transform', 'translate(' + width + ', 0)')
 
+		console.log(filteredEarthquakes);
 		var legend = d3.select("#timeline").append('div')
 			.attr('class', 'legend')
 			.style('margin-top', '30px');
@@ -732,16 +753,18 @@ var keys = legend.selectAll('.key')
 
 
 function showFilteredYears(selectedYear){
-
+	
 filteredEarthquakes = [];
+	console.log(earthquakes);
 earthquakes.forEach(function(d){
   filteredEarthquakes.push(d.filter(function (object) {
     var year = object.year;
     return year <= selectedYear;
   }));
 });
-
-drawTimeline();
+	d3.select("#timeline").select("svg").remove();
+	d3.select("#timeline").select(".legend").remove();
+	drawTimeline();
 
 	var features = vector.getSource().getFeatures();
 	var filteredFeatures = features.filter(function(d){
@@ -888,7 +911,6 @@ function drawPieChart(d){
 
 var ageDistribution = d.data["ageDistribution"];
 	var size = d.data["size"];
-	console.log(size);
 	for(var i in ageDistribution){
 		var age = ageDistribution[i];
 		age["percentage"] = "" + Math.round(age["number"]/size *100) + "%";
@@ -924,85 +946,11 @@ var arc = d3.arc()
 .outerRadius(radius);
 
 var pie = d3.pie()
+    .startAngle(1.1*Math.PI)
+    .endAngle(3.1*Math.PI)
 .value(function(d) { return d.number; })
 .sort(null);
-
-var path = g.selectAll('path')
-  .data(pie(ageDistribution))
-  .enter()
-  .append("g")
-  .append('path')
-  .attr('d', arc)
-  .attr('fill', (d,i) => color(i))
-  .style('opacity', opacity)
-  .style('stroke', 'white')
-  .each(function(d){this._current = d;})
-.on("mouseover", function(d) {
-      d3.select("#piechart").selectAll('path')
-        .style("opacity", otherOpacityOnHover);
-      d3.select(this)
-        .style("opacity", opacityHover);
-
-      var g = d3.select("#piechart").select("svg")
-        .style("cursor", "pointer")
-        .append("g")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
-
-
-      g.append("text")
-        .attr("class", "name-text")
-        .text(`${d.data.age} (${d.data.percentage})`)
-        .attr('text-anchor', 'middle');
-
-      var text = g.select("text");
-      var bbox = text.node().getBBox();
-      var padding = 2;
-      g.insert("rect", "text")
-        .attr("x", bbox.x - padding)
-        .attr("y", bbox.y - padding)
-        .attr("width", bbox.width + (padding*2))
-        .attr("height", bbox.height + (padding*2))
-        .style("fill", "white")
-        .style("opacity", 0.75);
-    })
-  .on("mousemove", function(d) {
-        var mousePosition = d3.mouse(this);
-        var x = mousePosition[0] + width/2;
-        var y = mousePosition[1] + height/2 - tooltipMargin;
-
-        var text = d3.select("#piechart").select('.tooltip text');
-        var bbox = text.node().getBBox();
-        if(x - bbox.width/2 < 0) {
-          x = bbox.width/2;
-        }
-        else if(width - x - bbox.width/2 < 0) {
-          x = width - bbox.width/2;
-        }
-
-        if(y - bbox.height/2 < 0) {
-          y = bbox.height + tooltipMargin * 2;
-        }
-        else if(height - y - bbox.height/2 < 0) {
-          y = height - bbox.height/2;
-        }
-
-        d3.select("#piechart").select('.tooltip')
-          .style("opacity", 1)
-          .attr('transform',`translate(${x}, ${y})`);
-    })
-  .on("mouseout", function(d) {
-      d3.select("#piechart").select("svg")
-        .style("cursor", "none")
-        .select(".tooltip").remove();
-    d3.select("#piechart").selectAll('path')
-        .style("opacity", opacity);
-    })
-  .on("touchstart", function(d) {
-      d3.select("#piechart").select("svg")
-        .style("cursor", "none");
-  })
-  .each(function(d, i) { this._current = i; });
+	
 
 var legend = d3.select("#piechart").append('div')
 			.attr('class', 'legend')
@@ -1029,22 +977,72 @@ var keys = legend.selectAll('.key')
 
 		keys.exit().remove();
 
+var path = g.selectAll('path')
+  .data(pie(ageDistribution))
+  .enter()
+  .append("g")
+  .append('path')
+  .style('fill', (d,i) => color(i))
+
+
+  //.attr('d', arc)
+  .transition().delay(function(d, i) { return i * 150; }).duration(150)
+  .attrTween('d', function(d) {
+       var i = d3.interpolate(d.startAngle+0.1, d.endAngle);
+       return function(t) {
+           d.endAngle = i(t);
+         return arc(d);
+       }
+  })
+
+
+  .style('opacity', opacity)
+  .style('stroke', 'white')
+  .each(function(d){this._current = d;})
+
+
+
+
 }
 
 
 function updatePieChart(d) {
-		if(d3.select("#piechart").select("svg").empty()){
-		console.log("empty");
-		drawPieChart(d);
-		return;
-	}
 
+	
+	
+	var color = d3.scaleOrdinal(["#ff0000","#1fe223","#f7f30e","#f70ea2"]);
+
+
+	var counter = 0;
+	var sliceCount = d3.select("#piechart").selectAll("path").size();
 
 	var ageDistribution = d.data["ageDistribution"];
 	if(ageDistribution === undefined){
-		d3.select("#piechart").select("svg").remove();
-		d3.select("#piechart").select(".legend").remove();
+		if(!d3.select("#piechart").select("svg").empty()){
+		d3.select("#piechart").selectAll("path")
+		  .transition().delay(function(d, i) { return i * 150; })
+		.duration(150)
+		.on("end", function(){
+			counter++;
+			if(counter === sliceCount){
+				d3.select("#piechart").select("svg").remove();
+				d3.select("#piechart").select(".legend").remove();
+			}
+		})
+		.remove();
+		
+		return;
+		}else{
+			return;
+		}
 	}
+		if(d3.select("#piechart").select("svg").empty()){
+			drawPieChart(d);
+			return;
+	} 
+	
+	
+	
 	var size = d.data["size"];
 	for(var i in ageDistribution){
 		var age = ageDistribution[i];
