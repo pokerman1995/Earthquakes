@@ -146,6 +146,7 @@ function buildHierarchy(csv){
 	}
 	return root;
 }
+
   that.buildHierarchy = buildHierarchy;
   that.binaryDataParser = binaryDataParser;
   that.dataParser = dataParser;

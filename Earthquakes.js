@@ -11,6 +11,11 @@ var parser = new EarthquakeDataProcesser();
 parser.dataParser(isLoaded, 0);
 parser.dataParser(isLoaded, 1);
 parser.binaryDataParser(isLoaded, 2);
+drawTimeline();
+drawLegend();
+
+
+//parser.parseJson();
 //var that = new EventPublisher();
 //var blur = document.getElementById('blur');
 //var radius = document.getElementById('radius');
@@ -57,6 +62,7 @@ vector.getSource().on('addfeature', function(event) {
 				earthquakes_per_year.push(obj);
 
 			}
+			earthquakes.push(earthquakes_per_year);
 			earthquakes_per_region[region] = earthquakes_per_year;
 		}
 		earthquakes_per_year = earthquakes_per_region[region];
@@ -166,14 +172,6 @@ Earthquakes.ChangeDataControl = function(opt_options) {
   });
 
 map.getView().setMinZoom(3.0);
-
-map.once('postcompose', function(event){
-
-	setTimeout(function(){
-		drawTimeline();
-    drawLegend();
-	}, 2500);
-});
 
 //  blur.addEventListener('input', function() {
 //    vector.setBlur(parseInt(blur.value, 10));
@@ -596,22 +594,12 @@ function drawTimeline(){
 	var margin = {top: 10, right: 80, bottom: 80, left: 80},
     width = document.getElementById("chart").offsetWidth-margin.left -margin.top+400,
 	height = 420-margin.right -margin.bottom;
-	earthquakes = [];
-	for(var region in earthquakes_per_region){
-		if(earthquakes_per_region.hasOwnProperty(region)){
-			var years = [];
-			for(var year in earthquakes_per_region[region]){
-				if(earthquakes_per_region[region].hasOwnProperty(year))
-				years.push(earthquakes_per_region[region][year]);
-			}
-			earthquakes.push(years);
-		}
-	}
+
 
 // Scales and axes. Note the inverted domain for the y-scale: bigger is up!
-var x = d3.scaleBand().range([0, width]),
+var x = d3.scaleLinear().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
-    xAxis = d3.axisBottom(x).tickSize(1),
+    xAxis = d3.axisBottom(x).ticks(30).tickFormat(d3.format("")),
     yAxis = d3.axisLeft(y).tickArguments(4);
 
 	var color = d3.scaleOrdinal(d3.schemeCategory10);
@@ -636,10 +624,8 @@ var line = d3.line()
 	var maxYear = d3.max(earthquakes, function(d){
 	  return d3.max(d, function(e){
 		  return e.year;})})
-  x.domain(earthquakes[0].map(function(d){return d.year}));
-  y.domain([0, d3.max(earthquakes, function(d) {
-	  return d3.max(d, function(e){
-		  return e.n; })})]).nice();
+  x.domain([1988, 2018]);
+  y.domain([0, 200]);
 
 
 	  var svg = d3.select("#timeline").append("svg:svg")
@@ -660,7 +646,7 @@ var line = d3.line()
   // Add the x-axis.
   var gX = svg.append("g")
       .attr("class", "x axis")
-      .attr("transform", "translate(-25," + height + ")")
+      .attr("transform", "translate(0," + height + ")")
       .call(xAxis);
 
 	d3.selectAll('.x.axis .tick')
@@ -673,7 +659,7 @@ var line = d3.line()
   // Add the y-axis.
   var gY = svg.append("g")
       .attr("class", "y axis")
-      .attr("transform", "translate(" + width-25 + ",0)")
+      .attr("transform", "translate(" + width-5 + ",0)")
       .call(yAxis);
 
 
@@ -695,10 +681,10 @@ var line = d3.line()
 
 	  /* Add 'curtain' rectangle to hide entire graph */
   var curtain = svg.append('rect')
-    .attr('x', -1 * width)
+    .attr('x', -1 * width -1)
     .attr('y', -1 * height)
     .attr('height', height)
-    .attr('width', width)
+    .attr('width', width-1)
     .attr('class', 'curtain')
     .attr('transform', 'rotate(180)')
     .style('fill', '#4A74A8');
