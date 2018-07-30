@@ -91,13 +91,13 @@ header p{
   padding-bottom: 10px;
 }
 
-#chart{
+#sunburstChart{
 	position: relative;
 
   width: 680px;
 }
 
-#chart path {
+#sunburstChart path {
   stroke: white;
 }
 
