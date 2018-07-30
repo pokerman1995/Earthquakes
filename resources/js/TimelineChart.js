@@ -129,16 +129,16 @@ Earthquakes.TimelineChart = function () {
   // Draw the timeline charts legend.
   function drawLegend(filteredEarthquakes) {
     let legend = d3.select("#timeline").append("div")
-      .attr("class", "legend")
-      .style("margin-top", "30px"),
+        .attr("class", "legend")
+        .style("margin-top", "30px"),
 
       keys = legend.selectAll(".key")
-      .data(filteredEarthquakes)
-      .enter().append("div")
-      .attr("class", "key")
-      .style("display", "flex")
-      .style("align-items", "center")
-      .style("margin-right", "20px");
+        .data(filteredEarthquakes)
+        .enter().append("div")
+        .attr("class", "key")
+        .style("display", "flex")
+        .style("align-items", "center")
+        .style("margin-right", "20px");
 
     keys.append("div")
       .attr("class", "symbol")
