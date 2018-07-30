@@ -17,7 +17,7 @@ Earthquakes.TimelineChart = function() {
     },
     width = document.getElementById("sunburstChart").offsetWidth - margin.left - margin.top + 400,
     height = 420 - margin.right - margin.bottom,
-    color = d3.scaleOrdinal(d3.schemeCategory10);
+    color = d3.scaleOrdinal(d3.schemeCategory20);
 
   function drawChart() {
     // Scales and axes. Note the inverted domain for the y-scale: bigger is up!
@@ -87,7 +87,7 @@ Earthquakes.TimelineChart = function() {
         .append("path")
         .attr("class", "line")
         .style("stroke", function(d, i) {
-          return color(i);
+          return color(i+4);
         })
         .attr("clip-path", "url(#clip)")
         .attr("d", function(d) {
@@ -143,7 +143,7 @@ Earthquakes.TimelineChart = function() {
         .style("height", "10px")
         .style("width", "10px")
         .style("margin", "5px 5px")
-        .style("background-color", (d, i) => color(i));
+        .style("background-color", (d, i) => color(i+4));
 
       keys.append("div")
         .attr("class", "name")
