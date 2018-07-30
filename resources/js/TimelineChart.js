@@ -1,10 +1,16 @@
 /* eslint-env browser */
 /* global EventPublisher */
 
+/*
+ * TimelineChart
+ *
+ * This module is responsible for drawing and animating the timeline graph.
+ */
+
 var Earthquakes = Earthquakes || {},
   d3 = d3 || {};
 
-Earthquakes.TimelineChart = function() {
+Earthquakes.TimelineChart = function () {
   "use strict";
   var that = new EventPublisher(),
     svg,
@@ -20,25 +26,28 @@ Earthquakes.TimelineChart = function() {
     color = d3.scaleOrdinal(d3.schemeCategory20);
 
   function drawChart() {
-    // Scales and axes. Note the inverted domain for the y-scale: bigger is up!
-    var x = d3.scaleLinear().range([0, width, ]),
+    // Initialize the Scales and axes.
+    let x = d3.scaleLinear().range([0, width, ]),
       y = d3.scaleLinear().range([height, 0, ]),
       xAxis = d3.axisBottom(x).ticks(30).tickFormat(d3.format("")),
       yAxis = d3.axisLeft(y).tickArguments(4);
 
-      // A line generator, for the dark stroke.
-      line = d3.line()
-        .curve(d3.curveMonotoneX)
-        .x(function(d) {
-          return x(d.year);
-        })
-        .y(function(d) {
-          return y(d.n);
-        });
+    // Initialize the line generator for the stroke.
+    line = d3.line()
+      .curve(d3.curveMonotoneX)
+      .x(function (d) {
+        return x(d.year);
+      })
+      .y(function (d) {
+        return y(d.n);
+      });
 
+    // Set the x and y domains. Cannot be calculated dynamically because then the diagram cant be drawn before the
+    // data is parsed completely.
     x.domain([1988, 2018, ]);
     y.domain([0, 200, ]);
 
+    // Create the svg element and the g container.
     svg = d3.select("#timeline").append("svg:svg")
       .attr("id", "timelineChart")
       .attr("width", width + margin.left + margin.right)
@@ -59,42 +68,43 @@ Earthquakes.TimelineChart = function() {
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
       .call(xAxis);
+
+    // Add the y-axis.
     svg.append("g")
       .attr("class", "y axis")
       .attr("transform", "translate( 0,0)")
       .call(yAxis);
-    
+
+    // Notify all listeners that the timeline is drawn.
     that.notifyAll("timelineDrawn", null);
-
-
-    // Add the y-axis.
 
   }
 
+  // Draw and animate one line for every region with the given data containing earthquakes per year for every region.
   function drawEarthquakeLines(filteredEarthquakes) {
-    var t,
-      keys;
-    
     if (filteredEarthquakes.length !== 0) {
+      // Remove lines and curtain so they can be redrawn depending on the data.
       svg.selectAll(".line").remove();
       svg.selectAll(".curtain").remove();
-      if(d3.select("#timeline").select(".legend").empty()){
+      // Draw legend only once.
+      if (d3.select("#timeline").select(".legend").empty()) {
         drawLegend(filteredEarthquakes);
       }
+      // Draw all lines.
       svg.selectAll(".line")
         .data(filteredEarthquakes)
         .enter()
         .append("path")
         .attr("class", "line")
-        .style("stroke", function(d, i) {
-          return color(i+4);
+        .style("stroke", function (d, i) {
+          return color(i + 4);
         })
         .attr("clip-path", "url(#clip)")
-        .attr("d", function(d) {
+        .attr("d", function (d) {
           return line(d);
         });
 
-      /* Add 'curtain' rectangle to hide entire graph */
+      // Add 'curtain' rectangle to hide entire graph 
       svg.append("rect")
         .attr("x", -1 * width - 1)
         .attr("y", -1 * height)
@@ -104,52 +114,44 @@ Earthquakes.TimelineChart = function() {
         .attr("transform", "rotate(180)")
         .style("fill", "#4A74A8");
 
-      /* Create a shared transition for anything we're animating */
-      t = svg.transition()
+      // Create a transition for animation 
+      let t = svg.transition()
         .delay(250)
         .duration(4000)
-        .ease(d3.easeLinear)
-        .on("end", function() {
-          d3.select("line.guide")
-            .transition()
-            .style("opacity", 0)
-            .remove();
-        });
+        .ease(d3.easeLinear);
 
+      // Animate the curtain to slowly show the lines under the certain.
       t.select("rect.curtain")
         .attr("width", 0);
-      t.select("line.guide")
-        .attr("transform", "translate(" + width + ", 0)");
-
-
     }
   }
-  
-  function drawLegend(filteredEarthquakes){
-          var legend = d3.select("#timeline").append("div")
-        .attr("class", "legend")
-        .style("margin-top", "30px"),
+
+  // Draw the timeline charts legend.
+  function drawLegend(filteredEarthquakes) {
+    let legend = d3.select("#timeline").append("div")
+      .attr("class", "legend")
+      .style("margin-top", "30px"),
 
       keys = legend.selectAll(".key")
-        .data(filteredEarthquakes)
-        .enter().append("div")
-        .attr("class", "key")
-        .style("display", "flex")
-        .style("align-items", "center")
-        .style("margin-right", "20px");
+      .data(filteredEarthquakes)
+      .enter().append("div")
+      .attr("class", "key")
+      .style("display", "flex")
+      .style("align-items", "center")
+      .style("margin-right", "20px");
 
-      keys.append("div")
-        .attr("class", "symbol")
-        .style("height", "10px")
-        .style("width", "10px")
-        .style("margin", "5px 5px")
-        .style("background-color", (d, i) => color(i+4));
+    keys.append("div")
+      .attr("class", "symbol")
+      .style("height", "10px")
+      .style("width", "10px")
+      .style("margin", "5px 5px")
+      .style("background-color", (d, i) => color(i + 4));
 
-      keys.append("div")
-        .attr("class", "name")
-        .text(d => `${d[0].name}`);
+    keys.append("div")
+      .attr("class", "name")
+      .text(d => `${d[0].name}`);
 
-      keys.exit().remove();
+    keys.exit().remove();
   }
 
   that.drawEarthquakeLines = drawEarthquakeLines;
