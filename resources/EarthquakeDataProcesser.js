@@ -205,14 +205,14 @@ Earthquakes.EarthquakeDataProcessor = function () {
               yearOld = 1988 + i;
             obj.year = yearOld;
             obj.n = 0;
-            obj.name = region;
+            obj.name = regionName;
             earthquakesPerYear.push(obj);
 
           }
           earthquakeList.push(earthquakesPerYear);
-          earthquakesPerRegion[region] = earthquakesPerYear;
+          earthquakesPerRegion[regionName] = earthquakesPerYear;
         }
-        earthquakesPerYear = earthquakesPerRegion[region];
+        earthquakesPerYear = earthquakesPerRegion[regionName];
         for (var i = 0; i < earthquakesPerYear.length; i++) {
           if (earthquakesPerYear[i].year == year) {
             earthquakesPerYear[i].n = earthquakesPerYear[i].n + 1;
@@ -220,6 +220,19 @@ Earthquakes.EarthquakeDataProcessor = function () {
         }
       }
 	}
+  
+      function filterYears(selectedYear) {
+      var filteredEarthquakes = [];
+      earthquakeList.forEach(function(d) {
+        filteredEarthquakes.push(d.filter(function(object) {
+          var year = object.year;
+          return year <= selectedYear;
+        }));
+      });
+        that.notifyAll("yearsFiltered", {"filteredEarthquakes" : filteredEarthquakes, "year": selectedYear});
+
+
+    }
 	
 	function getEarthquakeList(){
 		return earthquakeList;
@@ -233,6 +246,7 @@ Earthquakes.EarthquakeDataProcessor = function () {
 	that.getEarthquakesPerRegion = getEarthquakesPerRegion;
 	that.parseEarthquakeFeature = parseEarthquakeFeature;
   that.buildHierarchyFromCsv = buildHierarchyFromCsv;
+  that.filterYears = filterYears;
   that.binaryDataParser = binaryDataParser;
   that.dataParser = dataParser;
   return that;

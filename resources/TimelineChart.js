@@ -24,7 +24,7 @@ Earthquakes.TimelineChart = function() {
     var x = d3.scaleLinear().range([0, width, ]),
       y = d3.scaleLinear().range([height, 0, ]),
       xAxis = d3.axisBottom(x).ticks(30).tickFormat(d3.format("")),
-      yAxis = d3.axisLeft(y).tickArguments(4),
+      yAxis = d3.axisLeft(y).tickArguments(4);
 
       // A line generator, for the dark stroke.
       line = d3.line()
@@ -61,16 +61,11 @@ Earthquakes.TimelineChart = function() {
       .call(xAxis);
     svg.append("g")
       .attr("class", "y axis")
-      .attr("transform", "translate(" + width - 5 + ",0)")
+      .attr("transform", "translate( 0,0)")
       .call(yAxis);
+    
+    that.notifyAll("timelineDrawn", null);
 
-    d3.selectAll(".x.axis .tick")
-      .on("click", function(d) {
-        that.notifyAll("tickClicked", d);
-      })
-      .on("mouseover", function() {
-        d3.select(this).style("cursor", "pointer");
-      });
 
     // Add the y-axis.
 
@@ -78,9 +73,14 @@ Earthquakes.TimelineChart = function() {
 
   function drawEarthquakeLines(filteredEarthquakes) {
     var t,
-      legend,
       keys;
+    
     if (filteredEarthquakes.length !== 0) {
+      svg.selectAll(".line").remove();
+      svg.selectAll(".curtain").remove();
+      if(d3.select("#timeline").select(".legend").empty()){
+        drawLegend(filteredEarthquakes);
+      }
       svg.selectAll(".line")
         .data(filteredEarthquakes)
         .enter()
@@ -121,9 +121,14 @@ Earthquakes.TimelineChart = function() {
       t.select("line.guide")
         .attr("transform", "translate(" + width + ", 0)");
 
-      legend = d3.select("#timeline").append("div")
+
+    }
+  }
+  
+  function drawLegend(filteredEarthquakes){
+          var legend = d3.select("#timeline").append("div")
         .attr("class", "legend")
-        .style("margin-top", "30px");
+        .style("margin-top", "30px"),
 
       keys = legend.selectAll(".key")
         .data(filteredEarthquakes)
@@ -145,7 +150,6 @@ Earthquakes.TimelineChart = function() {
         .text(d => `${d[0].name}`);
 
       keys.exit().remove();
-    }
   }
 
   that.drawEarthquakeLines = drawEarthquakeLines;

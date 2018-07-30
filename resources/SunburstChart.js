@@ -43,18 +43,13 @@ Earthquakes.SunburstChart = function() {
       "Yes, one or more major ones": "#BE5E9A",
 
       "No answer": "#5cfbe4",
-    };
+    },
+      chart;
 
   function drawSunburstChart(json) {
 
-    var root,
+    var root, 
       nodes,
-      vis = d3.select("#sunburstChart").append("svg:svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("svg:g")
-        .attr("id", "container")
-        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")"),
 
       partition = d3.partition()
         .size([2 * Math.PI, radius * radius, ]),
@@ -72,8 +67,15 @@ Earthquakes.SunburstChart = function() {
         .outerRadius(function(d) {
           return Math.sqrt(d.y1);
         });
+    
+          chart = d3.select("#sunburstChart").append("svg:svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("svg:g")
+        .attr("id", "container")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")"),
 
-    vis.append("svg:circle")
+    chart.append("svg:circle")
       .attr("r", radius)
       .style("opacity", 0);
 
@@ -92,7 +94,7 @@ Earthquakes.SunburstChart = function() {
         return (d.x1 - d.x0 > 0.005); // 0.005 radians = 0.29 degrees
       });
 
-    vis.data([json, ]).selectAll("path")
+    chart.data([json, ]).selectAll("path")
       .data(nodes)
       .enter().append("svg:path")
       .attr("display", function(d) {
@@ -109,11 +111,67 @@ Earthquakes.SunburstChart = function() {
 
     // Get total size of the tree = value of root node from partition.
   }
+  
+      function drawLegend() {
+
+    // Dimensions of legend item: width, height, spacing, radius of rounded rect.
+      var li = {
+          w: 550,
+          h: 25,
+          s: 3,
+          r: 3,
+        },
+
+        questions = {
+          "In general, how worried are you about earthquakes?": "#A3BFE1",
+          "How worried are you about the Big One, a massive, catastrophic earthquake?": "#315F96",
+          "Do you think the \"Big One\" will occur in your lifetime?": "#8279CC",
+          "Have you ever experienced an earthquake?": "#428A9E",
+          "Have you or anyone in your household taken any precautions for an earthquake?": "#2D5965",
+          "How familiar are you with the San Andreas Fault line?": "#B2B8D3",
+          "How familiar are you with the Yellowstone Supervolcano?": "#4CBF6F",
+        },
+
+        questionColors = {};
+      for (var i = 0; i < 7; i++) {
+        var question = Object.keys(questions)[i],
+          color = questions[question];
+        questionColors[question] = color;
+      }
+
+      var legend = d3.select("#legend").append("svg:svg")
+          .attr("width", li.w)
+          .attr("height", d3.keys(questionColors).length * (li.h + li.s)),
+
+        g = legend.selectAll("g")
+          .data(d3.entries(questionColors))
+          .enter().append("svg:g")
+          .attr("transform", function(d, i) {
+            return "translate(0," + i * (li.h + li.s) + ")";
+          });
+
+      g.append("svg:rect")
+        .attr("rx", li.r)
+        .attr("ry", li.r)
+        .attr("width", li.w)
+        .attr("height", li.h)
+        .style("fill", function(d) {
+          return d.value;
+        });
+
+      g.append("svg:text")
+        .attr("x", li.w / 2)
+        .attr("y", li.h / 2)
+        .attr("dy", "0.35em")
+        .attr("text-anchor", "middle")
+        .text(function(d) {
+          return d.key;
+        });
+    }
 
   // Fade all but the current sequence, and show it in the breadcrumb trail.
   function mouseover(d, regionFeatures) {
 		
-		console.log(d);
 
       var regionData = d.data.regions;
 
@@ -138,7 +196,7 @@ Earthquakes.SunburstChart = function() {
         style.setFill(fill);
         regionFeatures[i].setStyle(style);
 
-        d3.select(this).style("cursor", "pointer");
+        //d3.select(this).style("cursor", "pointer");
       }
       //regions.getSource().clear();
       //regions.getSource().addFeatures(features);
@@ -154,7 +212,6 @@ Earthquakes.SunburstChart = function() {
         totalAnswers = d3.sum(ancestors[1].data.children, function(d) {
           return d.size;
         });
-      console.log(totalAnswers);
       d3.select("#question").text(ancestors[1].data.name);
       d3.select("#question-text").style("visibility", "");
       d3.select("#answer").text(d.data.name);
@@ -165,7 +222,6 @@ Earthquakes.SunburstChart = function() {
 
     var sequenceArray = d.ancestors().reverse();
 
-    console.log(d.ancestors());
     sequenceArray.shift();
 
     //var sequenceArray = d.ancestors().reverse();
@@ -176,13 +232,12 @@ Earthquakes.SunburstChart = function() {
       .style("opacity", 0.3);
 
     //Then highlight only those that are an ancestor of the current segment.
-    vis.selectAll("path")
+    chart.selectAll("path")
       .filter(function(node) {
         return (sequenceArray.indexOf(node) >= 0);
       })
       .style("opacity", 1);
 
-    updatePieChart(d);
   }
 
   // Restore everything to full opacity when moving off the visualization.
@@ -201,7 +256,7 @@ Earthquakes.SunburstChart = function() {
       .duration(1000)
       .style("opacity", 1)
       .on("end", function() {
-        d3.select(this).on("mouseover", mouseover);
+        that.notifyAll("mouseleaveEnd", null);
       });
 
     d3.select("#answer-text")
@@ -255,6 +310,7 @@ Earthquakes.SunburstChart = function() {
 
 	that.mouseover = mouseover;
 	that.mouseleave = mouseleave;
+  that.drawLegend = drawLegend;
   that.drawSunburstChart = drawSunburstChart;
   return that;
 };
