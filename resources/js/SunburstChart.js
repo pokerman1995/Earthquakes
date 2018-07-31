@@ -176,7 +176,7 @@ Earthquakes.SunburstChart = function () {
   }
 
   // Show the current question next to the sunburst chart and also the current answer if the user is hovering over
-  // an answer segment of the chart. Also adjust the opacity of the charts segments.
+  // an answer segment of the chart.
   function showQuestionAndAnswerText(d) {
 
     // If the user is hovering over a question segment, show the current question on the right of the chart.
@@ -200,9 +200,10 @@ Earthquakes.SunburstChart = function () {
       d3.select("#ages").style("visibility", "");
     }
   }
-  
-  function decreaseSegmentOpacity(d){
-    
+
+  // Decrease opacity of all segments except the selected one and its ancestor.
+  function decreaseSegmentOpacity(d) {
+
     let sequenceArray = d.ancestors().reverse();
 
     // Fade all the segments.
@@ -216,10 +217,19 @@ Earthquakes.SunburstChart = function () {
       })
       .style("opacity", 1);
   }
+  
+  // Hide answer and question text on the right of the chart.
+  function hideQuestionAndAnswerText() {
+    d3.select("#answer-text")
+      .style("visibility", "hidden");
+    d3.select("#question-text")
+      .style("visibility", "hidden");
+    d3.select("#ages")
+      .style("visibility", "hidden");
+  }
 
   // Restore everything to full opacity when moving off the visualization.
-  function hideQuestionAndAnswerText() {
-
+  function restoreSegmentOpacity() {
     // Deactivate all segments during transition.
     d3.select("#sunburstChart").selectAll("path").on("mouseover", null);
 
@@ -232,16 +242,6 @@ Earthquakes.SunburstChart = function () {
         // Notify all listeners that the mouseleave transition ended.
         that.notifyAll("mouseleaveEnd", null);
       });
-  }
-  
-  function restoreSegmentOpacity(){
-    // Hide answer and question text on the right of the chart.
-    d3.select("#answer-text")
-      .style("visibility", "hidden");
-    d3.select("#question-text")
-      .style("visibility", "hidden");
-    d3.select("#ages")
-      .style("visibility", "hidden");
   }
 
   that.showQuestionAndAnswerText = showQuestionAndAnswerText;
