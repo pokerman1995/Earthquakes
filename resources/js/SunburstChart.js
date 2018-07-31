@@ -177,7 +177,7 @@ Earthquakes.SunburstChart = function () {
 
   // Show the current question next to the sunburst chart and also the current answer if the user is hovering over
   // an answer segment of the chart. Also adjust the opacity of the charts segments.
-  function mouseover(d) {
+  function showQuestionAndAnswerText(d) {
 
     // If the user is hovering over a question segment, show the current question on the right of the chart.
     if (d.ancestors()[1].data.name === "root") {
@@ -199,7 +199,10 @@ Earthquakes.SunburstChart = function () {
       d3.select("#percentage").text("" + Math.round(d.data.size / totalAnswers * 1000) / 10 + "%");
       d3.select("#ages").style("visibility", "");
     }
-
+  }
+  
+  function decreaseSegmentOpacity(d){
+    
     let sequenceArray = d.ancestors().reverse();
 
     // Fade all the segments.
@@ -212,11 +215,10 @@ Earthquakes.SunburstChart = function () {
         return (sequenceArray.indexOf(node) >= 0);
       })
       .style("opacity", 1);
-
   }
 
   // Restore everything to full opacity when moving off the visualization.
-  function mouseleave() {
+  function hideQuestionAndAnswerText() {
 
     // Deactivate all segments during transition.
     d3.select("#sunburstChart").selectAll("path").on("mouseover", null);
@@ -230,7 +232,9 @@ Earthquakes.SunburstChart = function () {
         // Notify all listeners that the mouseleave transition ended.
         that.notifyAll("mouseleaveEnd", null);
       });
-
+  }
+  
+  function restoreSegmentOpacity(){
     // Hide answer and question text on the right of the chart.
     d3.select("#answer-text")
       .style("visibility", "hidden");
@@ -238,11 +242,12 @@ Earthquakes.SunburstChart = function () {
       .style("visibility", "hidden");
     d3.select("#ages")
       .style("visibility", "hidden");
-
   }
 
-  that.mouseover = mouseover;
-  that.mouseleave = mouseleave;
+  that.showQuestionAndAnswerText = showQuestionAndAnswerText;
+  that.hideQuestionAndAnswerText = hideQuestionAndAnswerText;
+  that.decreaseSegmentOpacity = decreaseSegmentOpacity;
+  that.restoreSegmentOpacity = restoreSegmentOpacity;
   that.drawLegend = drawLegend;
   that.drawSunburstChart = drawSunburstChart;
   return that;

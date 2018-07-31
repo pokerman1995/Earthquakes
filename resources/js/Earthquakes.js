@@ -87,7 +87,8 @@ Earthquakes = (function () {
    * chart if needed.
    */
   function onSunburstMouseover(d) {
-    sunburstChart.mouseover(d.data);
+    sunburstChart.showQuestionAndAnswerText(d.data);
+    sunburstChart.decreaseSegmentOpacity(d.data);
     map.dyeRegions(d.data);
     ageDistributionChart.updatePieChart(d.data);
   }
@@ -97,7 +98,8 @@ Earthquakes = (function () {
    * The sunburst chart then restores the opacity of its segments.
    */
   function onSunburstMouseleave() {
-    sunburstChart.mouseleave();
+    sunburstChart.hideQuestionAndAnswerText();
+    sunburstChart.restoreSegmentOpacity();
   }
 
   /* Callback that is passed on to the user input controller and the age distribution pie chart.
