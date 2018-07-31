@@ -131,29 +131,14 @@ Earthquakes.AgeDistributionChart = function () {
   /* This function either animates the transition from the old pie chart to the new 
    * pie chart or draws the pie chart if no pie chart exists yet or removes the current pie chart. */
   function updatePieChart(d) {
-    let counter = 0,
-      sliceCount = d3.select("#piechart").selectAll("path").size(),
-      ageDistribution = d.data["ageDistribution"],
+    let ageDistribution = d.data["ageDistribution"],
       size = d.data["size"],
       path;
 
     if (ageDistribution === undefined) {
       if (!d3.select("#piechart").select("svg").empty()) {
         // If user didnt hover over an answer in the sunburst chart, remove the pie chart.
-        d3.select("#piechart").selectAll("path")
-          .transition().delay(function (d, i) {
-            return i * 150;
-          })
-          .duration(150)
-          .on("end", function () {
-            counter++;
-            if (counter === sliceCount) {
-              d3.select("#piechart").select("svg").remove();
-              d3.select("#piechart").select(".legend").remove();
-            }
-          })
-          .remove();
-
+        removePieChart();
         return;
       }
       return;
@@ -189,6 +174,7 @@ Earthquakes.AgeDistributionChart = function () {
 
   }
 
+  // Animate the pie chart segments until they are no longer visible, then remove the chart.
   function removePieChart() {
     let counter = 0,
       sliceCount = d3.select("#piechart").selectAll("path").size();

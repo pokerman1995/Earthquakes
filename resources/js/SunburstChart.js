@@ -82,7 +82,7 @@ Earthquakes.SunburstChart = function () {
       .attr("id", "container")
       .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-    // Create the circle for the diagram.
+    // Create the bounding circle for the diagram.
     chart.append("svg:circle")
       .attr("r", radius)
       .style("opacity", 0);
@@ -99,7 +99,6 @@ Earthquakes.SunburstChart = function () {
     // For efficiency, filter nodes to keep only those large enough to see.
     nodes = partition(root).descendants()
       .filter(function (d) {
-        // 0.005 radians = 0.29 degrees
         return (d.x1 - d.x0 > 0.005);
       });
 

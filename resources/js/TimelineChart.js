@@ -25,6 +25,7 @@ Earthquakes.TimelineChart = function () {
     height = 420 - margin.right - margin.bottom,
     color = d3.scaleOrdinal(d3.schemeCategory20);
 
+  // Draw the skeleton(axes etc.) of the timeline chart.
   function drawChart() {
     // Initialize the Scales and axes.
     let x = d3.scaleLinear().range([0, width, ]),
@@ -43,7 +44,7 @@ Earthquakes.TimelineChart = function () {
       });
 
     // Set the x and y domains. Cannot be calculated dynamically because then the diagram cant be drawn before the
-    // data is parsed completely.
+    // earthuakes in the kml-file are parsed completely.
     x.domain([1988, 2018, ]);
     y.domain([0, 200, ]);
 

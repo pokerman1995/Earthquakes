@@ -80,7 +80,7 @@ Earthquakes = (function () {
     userInputController.registerListenerOnTimeline();
   }
 
-  /* Callback that is passed on to the sunburst, diagram, the map and the age distribution pie chart.
+  /* Callback that is passed on to the sunburst chart, the map and the age distribution pie chart.
    * This function is called when the user puts the mouse over the sunburst chart.
    * The data of the selected item in the sunburst diagram is then passed on to the sunburst chart to 
    * adjust the opacity, to the map to dye the regions, and to the age distribution chart to update the pie
@@ -135,8 +135,8 @@ Earthquakes = (function () {
   }
 
   /* Callback that is passed on to the timeline chart and the map.
-   * This function is called after the user has clicked on a year-label in the timeline chart
-   * when the earthquakes were filtered according to the clicked year.
+   * This function is called after the user has clicked on a year-label in the timeline chart,
+   * then when the earthquakes were filtered according to the clicked year.
    * The timeline then draws the lines showing the amount of earthquakes per year until the selected year
    * and the map animates the earthquakes that occured in the selected year.
    */

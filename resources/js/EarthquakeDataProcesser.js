@@ -163,7 +163,7 @@ Earthquakes.EarthquakeDataProcessor = function () {
     }
   }
 
-  // Return list of all earthquakes that occured in the given year.
+  // Create list of all earthquakes that occured in the given year.
   function filterYears(selectedYear) {
     var filteredEarthquakes = [];
     earthquakeList.forEach(function (d) {

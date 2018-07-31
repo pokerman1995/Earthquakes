@@ -202,7 +202,7 @@ Earthquakes.Map = function () {
   function displayFeatureInfo(pixel) {
     info.css({
       left: pixel[0] + "px",
-      top: (pixel[1]) + "px",
+      top: (pixel[1] - 10) + "px",
     });
     let feature = map.forEachFeatureAtPixel(pixel, function (feature) {
       return feature;
@@ -211,10 +211,8 @@ Earthquakes.Map = function () {
       info.tooltip("hide");
       // Show more detailed tooltip if user has hovered over an answer segment in the sunburst chart.
       if (feature.get("division") !== undefined) {
-        info.attr("data-original-title",
-          feature.get("name") + ": " + Math.round(feature.get("division") * 1000) / 10 + "% of people who answered '" +
-          feature.get("currentAnswer") + "' live in this region");
-      } 
+        info.attr("data-original-title", feature.get("tooltip"));
+      }
       // else only show name of region.
       else {
         info.attr("data-original-title", feature.get("name"));
@@ -262,6 +260,10 @@ Earthquakes.Map = function () {
         }
         regionFeatures[i].set("division", currentRegion["number"] / numOfAnswers);
         regionFeatures[i].set("currentAnswer", d.data.name);
+        // Create feature tooltip.
+        regionFeatures[i].set("tooltip", regionFeatures[i].get("name") + ": " + Math.round(regionFeatures[i].get("division") * 1000) / 10 +
+          "% of people who answered '" + regionFeatures[i].get("currentAnswer") + "' live in this region");
+
         style = regionFeatures[i].getStyle();
         fill = getStyle(currentRegion["number"], numOfAnswers);
         style.setFill(fill);
